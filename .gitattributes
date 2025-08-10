@@ -1,0 +1,18 @@
+# Tell GitHub to ignore generated native code for language detection
+android/** linguist-vendored
+ios/** linguist-vendored
+linux/** linguist-vendored
+macos/** linguist-vendored
+windows/** linguist-vendored
+web/** linguist-vendored
+
+# Mark Dart as the primary language
+*.dart linguist-language=Dart
+pubspec.yaml linguist-language=YAML
+pubspec.lock linguist-language=YAML
+
+# Ignore build artifacts
+build/** linguist-vendored
+.dart_tool/** linguist-vendored
+*.g.dart linguist-vendored
+*.freezed.dart linguist-vendored
