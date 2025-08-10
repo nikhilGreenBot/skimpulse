@@ -1,16 +1,19 @@
-# skimpulse_app
+# Skimpulse App
 
-A new Flutter project.
+This is an attempt to show [skimfeed.com](https://skimfeed.com) in an app-usable format. Skimpulse provides a mobile-friendly interface to browse trending tech news and articles from Skimfeed.
 
-## Getting Started
+## About
 
-This project is a starting point for a Flutter application.
+Skimpulse is a Flutter application that transforms the web-based Skimfeed experience into a native mobile app, making it easier to browse and read trending tech content on the go.
 
-A few resources to get you started if this is your first Flutter project:
+## Thanks
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+This app is inspired by and uses content from [Skimfeed.com](https://skimfeed.com). All content rights belong to their respective owners.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Copyright
+
+© 2025 nikhilGreenBot. Built with Flutter.
+
+---
+
+*This project is not affiliated with or endorsed by Skimfeed.com*
