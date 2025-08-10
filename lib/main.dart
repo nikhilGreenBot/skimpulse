@@ -39,30 +39,89 @@ class _HotScreenState extends State<HotScreen> {
   }
 
   Future<List<HotItem>> fetchHot() async {
-    final res = await http.get(Uri.parse('https://skimfeed.com/'), headers: {
-      'User-Agent': 'Skimpulse/1.0 (+flutter)',
-    });
-    if (res.statusCode != 200) throw Exception('Failed: ${res.statusCode}');
-    final doc = html_parser.parse(res.body);
-    final header = doc
-        .querySelectorAll('h1,h2,h3,h4')
-        .firstWhere(
-          (e) => e.text.toUpperCase().contains("WHAT'S HOT"),
-          orElse: () => html_parser.parse('<div></div>').documentElement!,
-        );
-    final items = <HotItem>[];
-    var node = header.nextElementSibling;
-    while (node != null && items.length < 60) {
-      for (final a in node.querySelectorAll('a')) {
-        final t = a.text.trim();
-        final h = a.attributes['href'] ?? '';
-        if (t.isNotEmpty && h.startsWith('http')) items.add(HotItem(t, h));
+    try {
+      final res = await http.get(Uri.parse('https://skimfeed.com/'), headers: {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1',
+      });
+      
+      if (res.statusCode != 200) throw Exception('Failed to load: ${res.statusCode}');
+      
+      final doc = html_parser.parse(res.body);
+      final items = <HotItem>[];
+      
+      // Try multiple parsing strategies
+      
+      // Strategy 1: Look for "What's Hot" section
+      try {
+        final hotHeaders = doc.querySelectorAll('h1,h2,h3,h4,h5,h6');
+        for (final header in hotHeaders) {
+          if (header.text.toUpperCase().contains("WHAT'S HOT") || 
+              header.text.toUpperCase().contains("HOT") ||
+              header.text.toUpperCase().contains("TRENDING")) {
+            var node = header.nextElementSibling;
+            while (node != null && items.length < 50) {
+              for (final a in node.querySelectorAll('a')) {
+                final t = a.text.trim();
+                final h = a.attributes['href'] ?? '';
+                if (t.isNotEmpty && h.startsWith('http') && t.length > 10) {
+                  items.add(HotItem(t, h));
+                }
+              }
+              if (items.isNotEmpty) break;
+              node = node.nextElementSibling;
+            }
+            if (items.isNotEmpty) break;
+          }
+        }
+      } catch (e) {
+        // Continue to next strategy
       }
-      if (items.isNotEmpty) break;
-      node = node.nextElementSibling;
+      
+      // Strategy 2: Look for any links with substantial text
+      if (items.isEmpty) {
+        try {
+          final allLinks = doc.querySelectorAll('a[href^="http"]');
+          for (final link in allLinks) {
+            final t = link.text.trim();
+            final h = link.attributes['href'] ?? '';
+            if (t.isNotEmpty && h.startsWith('http') && t.length > 15 && !t.contains('http')) {
+              items.add(HotItem(t, h));
+              if (items.length >= 30) break;
+            }
+          }
+        } catch (e) {
+          // Continue to next strategy
+        }
+      }
+      
+      // Strategy 3: Look for article-like content
+      if (items.isEmpty) {
+        try {
+          final articles = doc.querySelectorAll('article, .article, .post, .item');
+          for (final article in articles) {
+            final link = article.querySelector('a[href^="http"]');
+            if (link != null) {
+              final t = link.text.trim();
+              final h = link.attributes['href'] ?? '';
+              if (t.isNotEmpty && h.startsWith('http') && t.length > 10) {
+                items.add(HotItem(t, h));
+                if (items.length >= 20) break;
+              }
+            }
+          }
+        } catch (e) {
+          // Continue to fallback
+        }
+      }
+      
+      if (items.isEmpty) {
+        throw Exception("Couldn't parse content from skimfeed.com. The site structure may have changed.");
+      }
+      
+      return items;
+    } catch (e) {
+      throw Exception("Network error: ${e.toString()}");
     }
-    if (items.isEmpty) throw Exception("Couldn't parse What's Hot");
-    return items;
   }
 
   Future<void> refresh() async => setState(() => future = fetchHot());
@@ -82,7 +141,22 @@ class _HotScreenState extends State<HotScreen> {
                   const SizedBox(height: 48),
                   Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(snapshot.error.toString(), textAlign: TextAlign.center),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text(
+                          snapshot.error.toString(), 
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: refresh,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   )
                 ]);
               }
