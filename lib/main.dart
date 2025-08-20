@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';  // Temporarily disabled for iOS testing
 import 'dart:convert';
 import 'dart:io';
-// import 'article_screen.dart'; // Temporarily disabled
+import 'article_screen.dart';
 
 void main() => runApp(const SkimpulseApp());
 
@@ -82,16 +82,13 @@ class _HotScreenState extends State<HotScreen> {
   }
 
   Future<void> _openArticle(Article article) async {
-    final uri = Uri.parse(article.url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open: ${article.url}')),
-        );
-      }
-    }
+    // Navigate to the article reader screen
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ArticleScreen(article: article),
+      ),
+    );
   }
 
   @override
