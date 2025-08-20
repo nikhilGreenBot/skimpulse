@@ -1,0 +1,33 @@
+# Flutter specific files (not needed for server)
+lib/
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+test/
+pubspec.yaml
+pubspec.lock
+analysis_options.yaml
+
+# Flutter build artifacts
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Node modules (will be installed by Railway)
+node_modules/

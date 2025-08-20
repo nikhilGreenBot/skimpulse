@@ -11,8 +11,8 @@
 1. In Railway dashboard, click "New Project"
 2. Select "Deploy from GitHub repo"
 3. Choose your `skimpulse_app` repository
-4. Railway will automatically detect it's a Node.js app
-5. Set the root directory to `/` (root of your project)
+4. **Important**: Set the root directory to `/server` (not `/)
+5. Railway will automatically detect it's a Node.js app
 6. Click "Deploy"
 
 ### Step 3: Get Your Server URL
@@ -34,6 +34,7 @@ Replace `localhost:3000` in your Flutter app with your Railway URL.
 3. Configure:
    - **Name**: `skimpulse-api`
    - **Environment**: `Node`
+   - **Root Directory**: `/server`
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
 4. Click "Create Web Service"
@@ -60,8 +61,9 @@ heroku login
 # Create Heroku app
 heroku create your-skimpulse-api
 
-# Deploy
-git push heroku main
+# Deploy (from the server directory)
+cd server
+git subtree push --prefix server heroku main
 
 # Get your URL
 heroku info
@@ -89,10 +91,11 @@ You can set these in your deployment platform:
 ## Troubleshooting
 
 ### Common Issues:
-1. **Build fails**: Make sure `package.json` has correct dependencies
+1. **Build fails**: Make sure you're deploying from the `/server` directory
 2. **Port issues**: Server should use `process.env.PORT || 3000`
 3. **CORS errors**: Server already has CORS enabled
 4. **Timeout errors**: Added 10-second timeout to axios requests
+5. **Railway build plan error**: Use the `/server` directory approach
 
 ### Logs:
 - Railway: View logs in the Railway dashboard
@@ -108,3 +111,19 @@ You can set these in your deployment platform:
 | Heroku   | Discontinued | $7/month |
 
 **Recommendation**: Start with Railway for the best free experience!
+
+## Project Structure
+
+```
+skimpulse_app/
+├── server/           # API server (deploy this to Railway)
+│   ├── server.js
+│   ├── package.json
+│   └── README.md
+├── lib/              # Flutter app code
+├── android/          # Flutter Android files
+├── ios/              # Flutter iOS files
+└── ...               # Other Flutter files
+```
+
+**Important**: When deploying to Railway, set the root directory to `/server` to avoid confusion with Flutter files.
