@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Skimpulse Server Deployment Script
-# This script helps deploy the Node.js server to various platforms
+# This script helps deploy the Node.js server to various cloud platforms
 
 echo "🚀 Skimpulse Server Deployment Script"
 echo "====================================="
@@ -39,29 +39,24 @@ SERVER_PID=$!
 # Wait a moment for server to start
 sleep 3
 
-# Test the API
-curl -s http://localhost:3000/health > /dev/null
-if [ $? -eq 0 ]; then
-    echo "✅ Server is working locally"
+# Test the health endpoint
+if curl -s http://localhost:3000/health > /dev/null; then
+    echo "✅ Server is running and responding"
+    kill $SERVER_PID
 else
-    echo "❌ Server test failed"
-    kill $SERVER_PID 2>/dev/null
+    echo "❌ Server failed to start or respond"
+    kill $SERVER_PID
     exit 1
 fi
 
-# Stop the test server
-kill $SERVER_PID 2>/dev/null
-
 echo ""
-echo "🎉 Server is ready for deployment!"
+echo "🎉 Local testing completed successfully!"
 echo ""
-echo "📋 Next steps:"
-echo "1. Choose a deployment platform (Heroku, Railway, Render, Vercel)"
-echo "2. Follow the deployment instructions in README.md"
-echo "3. Update the API URL in lib/main.dart with your deployed server URL"
+echo "📋 Deployment Options:"
+echo "1. Heroku: heroku create && git push heroku main"
+echo "2. Railway: Connect GitHub repo to Railway"
+echo "3. Render: Connect GitHub repo to Render"
+echo "4. Vercel: vercel"
+echo "5. DigitalOcean App Platform: Use their dashboard"
 echo ""
-echo "💡 Quick deployment options:"
-echo "   • Heroku: heroku create && git push heroku main"
-echo "   • Railway: Connect GitHub repo to Railway"
-echo "   • Render: Connect GitHub repo to Render"
-echo "   • Vercel: npm i -g vercel && vercel"
+echo "💡 Remember to update the API URL in your Flutter app after deployment!"

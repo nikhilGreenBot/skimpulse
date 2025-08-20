@@ -82,12 +82,10 @@ class _HotScreenState extends State<HotScreen> {
   }
 
   Future<void> _openArticle(Article article) async {
-    // Temporarily open in external browser
     final uri = Uri.parse(article.url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      // Show error if can't open
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Could not open: ${article.url}')),

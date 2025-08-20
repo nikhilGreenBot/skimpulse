@@ -55,3 +55,35 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# iOS specific
+ios/Pods/
+ios/Podfile.lock
+ios/Runner.xcworkspace/xcshareddata/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Android specific
+android/.gradle/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+
+# macOS specific
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE specific
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Logs
+*.log
+logs/
