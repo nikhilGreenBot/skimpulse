@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Enable CORS for Flutter app
 app.use(cors());
@@ -18,7 +18,8 @@ app.get('/api/skimfeed', async (req, res) => {
     const response = await axios.get('https://skimfeed.com/', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
+      },
+      timeout: 10000 // 10 second timeout
     });
 
     const $ = cheerio.load(response.data);
@@ -132,10 +133,27 @@ app.get('/api/skimfeed', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Skimpulse API Server',
+    endpoints: {
+      articles: '/api/skimfeed',
+      health: '/health'
+    },
+    version: '1.0.0'
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 API endpoint: http://localhost:${PORT}/api/skimfeed`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
