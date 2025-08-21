@@ -18,7 +18,7 @@
     "nodemon": "^2.0.22"
   },
   "engines": {
-    "node": "16.x",
+    "node": "18.x",
     "npm": ">=8.0.0"
   },
   "keywords": ["api", "skimfeed", "news", "flutter", "express"],
