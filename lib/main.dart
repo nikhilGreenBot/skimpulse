@@ -50,6 +50,14 @@ class _HotScreenState extends State<HotScreen> {
   }
 
   String _getApiUrl() {
+    // Check if we have a production API URL
+    const String? productionApiUrl = String.fromEnvironment('API_URL');
+    
+    if (productionApiUrl != null && productionApiUrl.isNotEmpty) {
+      return '$productionApiUrl/api/skimfeed';
+    }
+    
+    // Development URLs
     // Android emulator uses 10.0.2.2, iOS simulator uses localhost
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:3000/api/skimfeed';
