@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "axios": "^1.6.2",
+    "axios": "^1.3.6",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5"
   },
@@ -18,8 +18,8 @@
     "nodemon": "^2.0.22"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
   },
   "keywords": ["api", "skimfeed", "news", "flutter", "express"],
   "author": "Nikhil Bastikar",
