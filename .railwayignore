@@ -31,3 +31,10 @@ Thumbs.db
 
 # Node modules (will be installed by Railway)
 node_modules/
+
+# Keep only server directory
+!server/
+!server/*
+!railway.json
+!nixpacks.toml
+!.railwayignore
