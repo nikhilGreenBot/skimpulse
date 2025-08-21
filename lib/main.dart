@@ -4,18 +4,78 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'article_screen.dart';
+import 'splash_screen.dart';
 
 void main() => runApp(const SkimpulseApp());
 
 class SkimpulseApp extends StatelessWidget {
   const SkimpulseApp({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Skimpulse",
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.deepPurple),
-      home: const HotScreen(),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6750A4), // Purple brand color
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: const Color(0xFF6750A4),
+          secondary: const Color(0xFF625B71),
+          tertiary: const Color(0xFF7D5260),
+          surface: const Color(0xFFFFFBFE),
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 2,
+          shadowColor: Colors.black26,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 4,
+          shadowColor: Colors.black26,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            elevation: 3,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      ),
+      home: const AppWrapper(),
+      debugShowCheckedModeBanner: false,
     );
+  }
+}
+
+class AppWrapper extends StatefulWidget {
+  const AppWrapper({super.key});
+
+  @override
+  State<AppWrapper> createState() => _AppWrapperState();
+}
+
+class _AppWrapperState extends State<AppWrapper> {
+  bool _showSplash = true;
+
+  void _onSplashComplete() {
+    setState(() {
+      _showSplash = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showSplash) {
+      return SplashScreen(onSplashComplete: _onSplashComplete);
+    }
+    return const HotScreen();
   }
 }
 
@@ -51,9 +111,9 @@ class _HotScreenState extends State<HotScreen> {
 
   String _getApiUrl() {
     // Check if we have a production API URL
-    const String? productionApiUrl = String.fromEnvironment('API_URL');
+    const String productionApiUrl = String.fromEnvironment('API_URL');
     
-    if (productionApiUrl != null && productionApiUrl.isNotEmpty) {
+    if (productionApiUrl.isNotEmpty) {
       return '$productionApiUrl/api/skimfeed';
     }
     
@@ -75,8 +135,9 @@ class _HotScreenState extends State<HotScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['success'] == true && data['articles'] != null) {
-          final articles = (data['articles'] as List)
+        if (data['success'] == true && data['articles'] is List) {
+          final List<dynamic> articlesList = data['articles'] as List;
+          final articles = articlesList
               .map((article) => Article.fromJson(article))
               .toList();
           return articles;
@@ -142,8 +203,8 @@ class _HotScreenState extends State<HotScreen> {
                     ),
                     subtitle: Text(
                       article.url,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                          style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 12,
                       ),
                       maxLines: 1,

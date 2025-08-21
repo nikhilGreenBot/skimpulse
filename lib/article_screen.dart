@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 // Import Article class from main.dart to avoid duplication
 import 'main.dart';
@@ -87,7 +86,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
     
     // Limit content length for better performance
     if (content.length > 2000) {
-      content = content.substring(0, 2000) + '...';
+      content = '${content.substring(0, 2000)}...';
     }
     
     return content.isEmpty ? 'Content not available' : content;
@@ -212,7 +211,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

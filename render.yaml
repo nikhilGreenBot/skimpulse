@@ -2,7 +2,7 @@ services:
   - type: web
     name: skimpulse-api
     env: node
-    rootDir: ./server
+    rootDir: ./server-deploy
     buildCommand: npm install
     startCommand: npm start
     plan: free
