@@ -2,46 +2,7 @@
 
 This is the API server for the Skimpulse Flutter app. It fetches and parses articles from skimfeed.com.
 
-## Quick Deploy to Railway
-
-### Option 1: Deploy from this repo
-1. Go to [railway.app](https://railway.app)
-2. Create new project
-3. Select "Deploy from GitHub repo"
-4. Choose this repository
-5. Deploy (no special settings needed)
-
-### Option 2: Manual upload
-1. Go to [railway.app](https://railway.app)
-2. Create new project
-3. Choose "Upload from your computer"
-4. Upload this folder
-5. Deploy
-
-## API Endpoints
-
-- `GET /` - Server info
-- `GET /health` - Health check
-- `GET /api/skimfeed` - Get articles from skimfeed.com
-
-## Environment Variables
-
-- `PORT` - Server port (auto-set by Railway)
-- `NODE_ENV` - Environment (development/production)
-
-## Testing
-
-Once deployed, test your server:
-
-```bash
-# Test health endpoint
-curl https://your-server-url.railway.app/health
-
-# Test articles endpoint
-curl https://your-server-url.railway.app/api/skimfeed
-```
-
-## Local Development
+## Quick Start
 
 ```bash
 # Install dependencies
@@ -54,11 +15,19 @@ npm start
 npm run dev
 ```
 
-## For Flutter App
+## API Endpoints
 
-After deployment, update your Flutter app with the server URL:
+- `GET /` - Server info
+- `GET /health` - Health check
+- `GET /api/skimfeed` - Get articles from skimfeed.com
 
-```bash
-# In your Flutter project
-./update_server_url.sh "https://your-server-url.railway.app"
-```
+## Environment Variables
+
+- `PORT` - Server port (default: 3000)
+- `NODE_ENV` - Environment (development/production)
+
+## Deployment
+
+This server is designed to be deployed to Railway, Render, or Heroku.
+
+See the main project's `DEPLOYMENT.md` for detailed instructions.

@@ -1,16 +1,15 @@
 {
-  "name": "skimpulse-api-server",
+  "name": "skimpulse-api-server-simple",
   "version": "1.0.0",
-  "description": "API server for Skimpulse Flutter app - fetches articles from skimfeed.com",
-  "main": "server.js",
+  "description": "API server for Skimpulse Flutter app - simple version without axios",
+  "main": "server-simple.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node server-simple.js",
+    "dev": "nodemon server-simple.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "axios": "^0.27.2",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5"
   },
@@ -23,9 +22,5 @@
   },
   "keywords": ["api", "skimfeed", "news", "flutter", "express"],
   "author": "Nikhil Bastikar",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nikhilGreenBot/skimpulse.git"
-  }
+  "license": "MIT"
 }

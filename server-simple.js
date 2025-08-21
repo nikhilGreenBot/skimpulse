@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios');
+const https = require('https');
 const cheerio = require('cheerio');
 const cors = require('cors');
 
@@ -10,19 +10,48 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Helper function to make HTTPS requests
+function makeHttpsRequest(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
+      timeout: 15000
+    }, (res) => {
+      let data = '';
+      
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      
+      res.on('end', () => {
+        if (res.statusCode === 200) {
+          resolve(data);
+        } else {
+          reject(new Error(`HTTP ${res.statusCode}`));
+        }
+      });
+    });
+    
+    req.on('error', (error) => {
+      reject(error);
+    });
+    
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timeout'));
+    });
+  });
+}
+
 // Route to get skimfeed.com content
 app.get('/api/skimfeed', async (req, res) => {
   try {
     console.log('🔍 Fetching skimfeed.com...');
     
-    const response = await axios.get('https://skimfeed.com/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
-      timeout: 15000 // 15 second timeout
-    });
-
-    const $ = cheerio.load(response.data);
+    const htmlContent = await makeHttpsRequest('https://skimfeed.com/');
+    const $ = cheerio.load(htmlContent);
     const articles = [];
 
     // Look for article links that start with r.php (these are the actual articles)
@@ -144,7 +173,7 @@ app.get('/health', (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'Skimpulse API Server',
+    message: 'Skimpulse API Server (Simple Version)',
     endpoints: {
       articles: '/api/skimfeed',
       health: '/health'
