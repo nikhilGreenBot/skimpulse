@@ -1,34 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Background color matching app theme -->
     <item>
         <shape>
             <gradient
-                android:startColor="#6750A4"
-                android:endColor="#625B71"
-                android:angle="90" />
+                android:angle="135"
+                android:startColor="#4A90E2"
+                android:endColor="#2E5A8A"
+                android:type="linear" />
         </shape>
     </item>
-
-    <!-- App logo/icon in center -->
-    <item android:gravity="center">
-        <shape android:shape="oval">
-            <solid android:color="@android:color/white" />
-            <size android:width="120dp" android:height="120dp" />
-        </shape>
-    </item>
-    
-    <!-- Lightning bolt icon -->
-    <item android:gravity="center">
-        <vector
-            android:width="60dp"
-            android:height="60dp"
-            android:viewportWidth="24"
-            android:viewportHeight="24">
-            <path
-                android:fillColor="#6750A4"
-                android:pathData="M7,2v11h3v9l7,-12h-4l4,-8z"/>
-        </vector>
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher" />
     </item>
 </layer-list>

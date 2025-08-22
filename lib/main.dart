@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// import 'package:url_launcher/url_launcher.dart';  // Temporarily disabled for iOS testing
 import 'dart:convert';
 import 'dart:io';
 import 'article_screen.dart';
 import 'splash_screen.dart';
+import 'theme.dart';
 
 void main() => runApp(const SkimpulseApp());
 
@@ -15,39 +15,8 @@ class SkimpulseApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Skimpulse",
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4), // Purple brand color
-          brightness: Brightness.light,
-        ).copyWith(
-          primary: const Color(0xFF6750A4),
-          secondary: const Color(0xFF625B71),
-          tertiary: const Color(0xFF7D5260),
-          surface: const Color(0xFFFFFBFE),
-        ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 2,
-          shadowColor: Colors.black26,
-        ),
-        cardTheme: CardThemeData(
-          elevation: 4,
-          shadowColor: Colors.black26,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            elevation: 3,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       home: const AppWrapper(),
       debugShowCheckedModeBanner: false,
     );
@@ -102,56 +71,84 @@ class HotScreen extends StatefulWidget {
 
 class _HotScreenState extends State<HotScreen> {
   late Future<List<Article>> future;
+  int _retryCount = 0;
+  static const int maxRetries = 3;
 
   @override
   void initState() {
     super.initState();
-    future = fetchArticles();
+    future = fetchArticlesWithRetry();
   }
 
   String _getApiUrl() {
-    // Check if we have a production API URL
-    const String productionApiUrl = String.fromEnvironment('API_URL');
+    const String productionApiUrl = 'https://api-deploy-9so9.onrender.com';
+    const String customApiUrl = String.fromEnvironment('API_URL');
     
-    if (productionApiUrl.isNotEmpty) {
-      return '$productionApiUrl/api/skimfeed';
+    if (customApiUrl.isNotEmpty) {
+      return '$customApiUrl/api/skimfeed';
     }
     
-    // Development URLs
-    // Android emulator uses 10.0.2.2, iOS simulator uses localhost
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000/api/skimfeed';
-    } else {
-      return 'http://localhost:3000/api/skimfeed';
+    return '$productionApiUrl/api/skimfeed';
+  }
+
+  Future<List<Article>> fetchArticlesWithRetry() async {
+    _retryCount = 0;
+    return _fetchWithRetry();
+  }
+
+  Future<List<Article>> _fetchWithRetry() async {
+    while (_retryCount < maxRetries) {
+      try {
+        return await fetchArticles();
+      } catch (e) {
+        _retryCount++;
+        
+        if (_retryCount >= maxRetries) {
+          throw Exception('Failed after $_retryCount attempts. Please check your connection and try again.');
+        }
+        
+        await Future.delayed(Duration(seconds: _retryCount));
+      }
     }
+    throw Exception('Unexpected error in retry logic');
   }
 
   Future<List<Article>> fetchArticles() async {
     try {
+      final apiUrl = _getApiUrl();
+      
       final response = await http.get(
-        Uri.parse(_getApiUrl()),
+        Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-      );
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        
         if (data['success'] == true && data['articles'] is List) {
           final List<dynamic> articlesList = data['articles'] as List;
           final articles = articlesList
               .map((article) => Article.fromJson(article))
               .toList();
           return articles;
+        } else {
+          throw Exception('Invalid response format: ${data.toString()}');
         }
+      } else {
+        throw Exception('HTTP ${response.statusCode}: ${response.body}');
       }
-      
-      throw Exception('Failed to load articles');
     } catch (e) {
-      throw Exception('Network error: $e');
+      if (e.toString().contains('timeout')) {
+        throw Exception('Request timed out. Please check your internet connection.');
+      } else if (e.toString().contains('SocketException')) {
+        throw Exception('Network error. Please check your internet connection.');
+      } else {
+        throw Exception('Failed to load articles: $e');
+      }
     }
   }
 
   Future<void> _openArticle(Article article) async {
-    // Navigate to the article reader screen
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -171,7 +168,7 @@ class _HotScreenState extends State<HotScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               setState(() {
-                future = fetchArticles();
+                future = fetchArticlesWithRetry();
               });
             },
           ),
@@ -217,27 +214,69 @@ class _HotScreenState extends State<HotScreen> {
               },
             );
           } else if (snapshot.hasError) {
+            final isFinalError = _retryCount >= maxRetries;
+            
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error: ${snapshot.error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        future = fetchArticles();
-                      });
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isFinalError ? Icons.error_outline : Icons.cloud_off,
+                      size: 64,
+                      color: isFinalError 
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      isFinalError ? 'Something Went Wrong' : 'Connection Error',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      isFinalError 
+                          ? 'We\'re having trouble connecting to our servers.'
+                          : 'Unable to load articles from the server.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (!isFinalError) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Attempt $_retryCount of $maxRetries',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'Error: ${snapshot.error}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          future = fetchArticlesWithRetry();
+                        });
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: Text(isFinalError ? 'Try Again' : 'Retry'),
+                    ),
+                  ],
+                ),
               ),
             );
           }

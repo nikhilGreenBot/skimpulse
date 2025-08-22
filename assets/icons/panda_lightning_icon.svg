@@ -1,0 +1,32 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="512" cy="512" r="512" fill="#4A90E2"/>
+  
+  <!-- Lightning bolt -->
+  <path d="M512 150 L400 400 L600 400 L450 650 L550 650 L400 874 L512 624 L312 624 L462 374 Z" fill="#FFD700" stroke="#FFA500" stroke-width="8"/>
+  
+  <!-- Panda head -->
+  <circle cx="512" cy="512" r="200" fill="white" stroke="#333" stroke-width="8"/>
+  
+  <!-- Panda ears -->
+  <circle cx="412" cy="412" r="60" fill="#333"/>
+  <circle cx="612" cy="412" r="60" fill="#333"/>
+  
+  <!-- Panda eyes -->
+  <circle cx="462" cy="462" r="35" fill="#333"/>
+  <circle cx="562" cy="462" r="35" fill="#333"/>
+  
+  <!-- Eye highlights -->
+  <circle cx="470" cy="450" r="8" fill="white"/>
+  <circle cx="570" cy="450" r="8" fill="white"/>
+  
+  <!-- Panda nose -->
+  <ellipse cx="512" cy="512" rx="15" ry="8" fill="#333"/>
+  
+  <!-- Panda mouth -->
+  <path d="M492 532 Q512 552 532 532" stroke="#333" stroke-width="4" fill="none"/>
+  
+  <!-- Small lightning details -->
+  <circle cx="512" cy="200" r="15" fill="#FFD700"/>
+  <circle cx="512" cy="824" r="15" fill="#FFD700"/>
+</svg>
