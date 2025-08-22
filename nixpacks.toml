@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["flutter", "dart", "nodejs", "npm"]
+
+[phases.install]
+cmds = ["flutter pub get", "npm install"]
+
+[phases.build]
+cmds = ["flutter build web --release"]
+
+[start]
+cmd = "npm start"

@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.nikhilbastikar.skimpulse_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973" // Updated to match url_launcher_android requirements
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
