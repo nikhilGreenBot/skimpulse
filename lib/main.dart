@@ -107,7 +107,8 @@ class _HotScreenState extends State<HotScreen> {
           throw Exception('Failed after $_retryCount attempts. Please check your connection and try again.');
         }
         
-        await Future.delayed(Duration(seconds: _retryCount));
+        // Wait longer between retries for Render's sleep mode
+        await Future.delayed(Duration(seconds: _retryCount * 2));
       }
     }
     throw Exception('Unexpected error in retry logic');

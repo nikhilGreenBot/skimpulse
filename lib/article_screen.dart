@@ -15,7 +15,7 @@ class ArticleScreen extends StatefulWidget {
 }
 
 class _ArticleScreenState extends State<ArticleScreen> {
-  late final WebViewController _controller;
+  WebViewController? _controller;
   var loadingPercentage = 0;
   bool _isLoading = true;
   bool _hasError = false;
@@ -111,8 +111,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
       body: Stack(
         children: [
           // WebView content
-          if (!_hasError)
-            WebViewWidget(controller: _controller),
+          if (!_hasError && _controller != null)
+            WebViewWidget(controller: _controller!),
           
           // Loading overlay
           if (_isLoading)
@@ -264,7 +264,12 @@ class _ArticleScreenState extends State<ArticleScreen> {
                             _isLoading = true;
                             loadingPercentage = 0;
                           });
-                          _initializeWebView();
+                          // Reload the current page instead of reinitializing
+                          if (_controller != null) {
+                            _controller!.reload();
+                          } else {
+                            _initializeWebView();
+                          }
                         },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Retry'),
