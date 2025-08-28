@@ -18,7 +18,7 @@ class AppTheme {
       secondary: primaryYellow,
       tertiary: accentOrange,
       surface: Colors.white,
-      background: Colors.grey[50]!,
+      background: const Color(0xFFF8FAFF), // Light blue tint
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: primaryBlue,

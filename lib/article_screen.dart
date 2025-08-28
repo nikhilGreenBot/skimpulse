@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Import Article class from main.dart to avoid duplication
 import 'main.dart';
@@ -34,6 +35,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
       _controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(const Color(0x00000000))
+        ..setUserAgent('Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36')
         ..setNavigationDelegate(
           NavigationDelegate(
             onProgress: (int progress) {
@@ -55,11 +57,15 @@ class _ArticleScreenState extends State<ArticleScreen> {
               });
             },
             onWebResourceError: (WebResourceError error) {
-              setState(() {
-                _isLoading = false;
-                _hasError = true;
-                _errorMessage = 'Failed to load article: ${error.description}';
-              });
+              print('WebView error: ${error.errorCode} - ${error.description}');
+              // Only show error for critical failures, not for minor resource loading issues
+              if (error.errorCode == -2 || error.errorCode == -1009 || error.errorCode == -1001) {
+                setState(() {
+                  _isLoading = false;
+                  _hasError = true;
+                  _errorMessage = 'Failed to load article: ${error.description}';
+                });
+              }
             },
             onNavigationRequest: (NavigationRequest request) {
               return NavigationDecision.navigate;
@@ -77,15 +83,115 @@ class _ArticleScreenState extends State<ArticleScreen> {
   }
 
   String _extractActualUrl(String skimfeedUrl) {
-    // Extract the actual URL from skimfeed redirect URLs
-    if (skimfeedUrl.contains('skimfeed.com/r.php')) {
-      final uri = Uri.parse(skimfeedUrl);
-      final uParam = uri.queryParameters['u'];
-      if (uParam != null) {
-        return Uri.decodeComponent(uParam);
+    try {
+      print('Extracting URL from: $skimfeedUrl');
+      
+      // Handle skimfeed redirect URLs
+      if (skimfeedUrl.contains('skimfeed.com/r.php')) {
+        final uri = Uri.parse(skimfeedUrl);
+        final uParam = uri.queryParameters['u'];
+        if (uParam != null) {
+          final decodedUrl = Uri.decodeComponent(uParam);
+          print('Extracted from skimfeed: $decodedUrl');
+          return decodedUrl;
+        }
+      }
+      
+      // Handle other common redirect patterns
+      if (skimfeedUrl.contains('redirect') || skimfeedUrl.contains('url=')) {
+        final uri = Uri.parse(skimfeedUrl);
+        // Try common parameter names
+        final urlParam = uri.queryParameters['url'] ?? 
+                        uri.queryParameters['u'] ?? 
+                        uri.queryParameters['link'] ??
+                        uri.queryParameters['target'];
+        if (urlParam != null) {
+          final decodedUrl = Uri.decodeComponent(urlParam);
+          print('Extracted from redirect: $decodedUrl');
+          return decodedUrl;
+        }
+      }
+      
+      // If no extraction needed, return as-is
+      print('No extraction needed, using original: $skimfeedUrl');
+      return skimfeedUrl;
+    } catch (e) {
+      print('Error extracting URL: $e');
+      return skimfeedUrl; // Fallback to original
+    }
+  }
+
+  Future<void> _openInExternalBrowser() async {
+    try {
+      final originalUrl = widget.article.url;
+      final actualUrl = _extractActualUrl(originalUrl);
+      
+      // Debug logging
+      print('Original URL: $originalUrl');
+      print('Extracted URL: $actualUrl');
+      
+      // Validate URL
+      if (actualUrl.isEmpty) {
+        throw Exception('Empty URL after extraction');
+      }
+      
+      final uri = Uri.parse(actualUrl);
+      
+      // Additional validation
+      if (!uri.hasScheme) {
+        throw Exception('URL missing scheme (http/https)');
+      }
+      
+      if (!uri.hasAuthority) {
+        throw Exception('URL missing domain');
+      }
+      
+      print('Parsed URI: $uri');
+      print('Scheme: ${uri.scheme}');
+      print('Authority: ${uri.authority}');
+      
+      if (await canLaunchUrl(uri)) {
+        print('Can launch URL, attempting to open...');
+        
+        // Try different launch modes
+        try {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          print('URL launched successfully with externalApplication');
+        } catch (e) {
+          print('External application failed, trying platformDefault: $e');
+          try {
+            await launchUrl(uri, mode: LaunchMode.platformDefault);
+            print('URL launched successfully with platformDefault');
+          } catch (e2) {
+            print('Platform default failed, trying externalNonBrowserApplication: $e2');
+            await launchUrl(uri, mode: LaunchMode.externalNonBrowserApplication);
+            print('URL launched successfully with externalNonBrowserApplication');
+          }
+        }
+      } else {
+        print('Cannot launch URL');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cannot open URL: $actualUrl'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error in _openInExternalBrowser: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening article: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     }
-    return skimfeedUrl;
   }
 
   @override
@@ -102,9 +208,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.open_in_new),
-            onPressed: () async {
-              // Optionally, open in external browser
-            },
+            onPressed: _openInExternalBrowser,
           ),
         ],
       ),
@@ -117,7 +221,17 @@ class _ArticleScreenState extends State<ArticleScreen> {
           // Loading overlay
           if (_isLoading)
             Container(
-              color: Colors.white,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppTheme.primaryBlue.withOpacity(0.1),
+                    AppTheme.primaryYellow.withOpacity(0.05),
+                    AppTheme.primaryBlue.withOpacity(0.1),
+                  ],
+                ),
+              ),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -137,9 +251,16 @@ class _ArticleScreenState extends State<ArticleScreen> {
                           Container(
                             width: 50,
                             height: 50,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryBlue.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
                           ),
                           // Panda ears
@@ -228,7 +349,17 @@ class _ArticleScreenState extends State<ArticleScreen> {
           // Error overlay
           if (_hasError)
             Container(
-              color: Colors.white,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppTheme.primaryBlue.withOpacity(0.1),
+                    AppTheme.primaryYellow.withOpacity(0.05),
+                    AppTheme.primaryBlue.withOpacity(0.1),
+                  ],
+                ),
+              ),
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -257,22 +388,72 @@ class _ArticleScreenState extends State<ArticleScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _hasError = false;
+                                _isLoading = true;
+                                loadingPercentage = 0;
+                              });
+                              // Reload the current page instead of reinitializing
+                              if (_controller != null) {
+                                _controller!.reload();
+                              } else {
+                                _initializeWebView();
+                              }
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Retry'),
+                          ),
+                          const SizedBox(width: 16),
+                          ElevatedButton.icon(
+                            onPressed: _openInExternalBrowser,
+                            icon: const Icon(Icons.open_in_new),
+                            label: const Text('Open in Browser'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryBlue,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Test button to verify url_launcher works
                       ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _hasError = false;
-                            _isLoading = true;
-                            loadingPercentage = 0;
-                          });
-                          // Reload the current page instead of reinitializing
-                          if (_controller != null) {
-                            _controller!.reload();
-                          } else {
-                            _initializeWebView();
+                        onPressed: () async {
+                          try {
+                            final testUri = Uri.parse('https://www.google.com');
+                            if (await canLaunchUrl(testUri)) {
+                              await launchUrl(testUri, mode: LaunchMode.externalApplication);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Test URL opened successfully'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Test failed: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           }
                         },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
+                        icon: const Icon(Icons.bug_report),
+                        label: const Text('Test Browser'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                        ),
                       ),
                     ],
                   ),
