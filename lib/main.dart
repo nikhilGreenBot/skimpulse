@@ -158,6 +158,19 @@ class _HotScreenState extends State<HotScreen> {
     );
   }
 
+  String _formatDate() {
+    final now = DateTime.now();
+    final random = now.millisecondsSinceEpoch % 7; // Random day within last week
+    final date = now.subtract(Duration(days: random));
+    
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,15 +191,15 @@ class _HotScreenState extends State<HotScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              AppTheme.primaryBlue.withOpacity(0.05),
-              AppTheme.primaryYellow.withOpacity(0.03),
-              AppTheme.primaryBlue.withOpacity(0.08),
-              AppTheme.lightBlue.withOpacity(0.04),
+              AppTheme.primaryBlue.withOpacity(0.15),
+              AppTheme.lightBlue.withOpacity(0.1),
+              AppTheme.primaryYellow.withOpacity(0.08),
+              AppTheme.darkBlue.withOpacity(0.12),
             ],
-            stops: const [0.0, 0.3, 0.7, 1.0],
+            stops: const [0.0, 0.4, 0.7, 1.0],
           ),
         ),
         child: FutureBuilder<List<Article>>(
@@ -197,49 +210,126 @@ class _HotScreenState extends State<HotScreen> {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 final article = snapshot.data![index];
-                return Card(
+                return Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withOpacity(0.25),
+                        Colors.white.withOpacity(0.15),
+                        Colors.white.withOpacity(0.1),
+                      ],
+                    ),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      // Main shadow for depth
+                      BoxShadow(
+                        color: AppTheme.primaryBlue.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 8),
+                      ),
+                      // Secondary shadow for more depth
+                      BoxShadow(
+                        color: AppTheme.darkBlue.withOpacity(0.2),
+                        blurRadius: 40,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 16),
+                      ),
+                      // Inner highlight for glass effect
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.3),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.white.withOpacity(0.95),
-                          Colors.white.withOpacity(0.9),
+                  child: ListTile(
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.primaryBlue,
+                            AppTheme.darkBlue,
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryBlue.withOpacity(0.4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 4),
+                          ),
                         ],
                       ),
-                    ),
-                    child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        '${index + 1}',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.transparent,
+                        child: Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: Colors.white, 
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Roboto',
+                            shadows: [
+                              Shadow(
+                                color: Colors.black26,
+                                blurRadius: 2,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     title: Text(
                       article.title,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        color: Colors.black,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white,
+                            blurRadius: 1,
+                            offset: Offset(0, 1),
+                          ),
+                        ],
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
-                      article.url,
-                                          style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      _formatDate(),
+                      style: TextStyle(
+                        color: AppTheme.darkBlue.withOpacity(0.8),
                         fontSize: 12,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w600,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white.withOpacity(0.5),
+                            blurRadius: 1,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     onTap: () => _openArticle(article),
-                    trailing: const Icon(Icons.arrow_forward_ios),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios,
+                      color: AppTheme.primaryBlue,
+                      size: 16,
                     ),
                   ),
                 );
@@ -258,15 +348,16 @@ class _HotScreenState extends State<HotScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
+                      Colors.white.withOpacity(0.98),
                       Colors.white.withOpacity(0.95),
-                      Colors.white.withOpacity(0.9),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryBlue.withOpacity(0.1),
-                      blurRadius: 10,
+                      color: AppTheme.primaryBlue.withOpacity(0.15),
+                      blurRadius: 12,
                       spreadRadius: 2,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
