@@ -175,7 +175,21 @@ class _HotScreenState extends State<HotScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Article>>(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppTheme.primaryBlue.withOpacity(0.05),
+              AppTheme.primaryYellow.withOpacity(0.03),
+              AppTheme.primaryBlue.withOpacity(0.08),
+              AppTheme.lightBlue.withOpacity(0.04),
+            ],
+            stops: const [0.0, 0.3, 0.7, 1.0],
+          ),
+        ),
+        child: FutureBuilder<List<Article>>(
         future: future,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -185,7 +199,23 @@ class _HotScreenState extends State<HotScreen> {
                 final article = snapshot.data![index];
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: ListTile(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.95),
+                          Colors.white.withOpacity(0.9),
+                        ],
+                      ),
+                    ),
+                    child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       child: Text(
@@ -210,6 +240,7 @@ class _HotScreenState extends State<HotScreen> {
                     ),
                     onTap: () => _openArticle(article),
                     trailing: const Icon(Icons.arrow_forward_ios),
+                    ),
                   ),
                 );
               },
@@ -218,8 +249,27 @@ class _HotScreenState extends State<HotScreen> {
             final isFinalError = _retryCount >= maxRetries;
             
             return Center(
-              child: Padding(
+              child: Container(
+                margin: const EdgeInsets.all(24.0),
                 padding: const EdgeInsets.all(24.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.95),
+                      Colors.white.withOpacity(0.9),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -283,6 +333,7 @@ class _HotScreenState extends State<HotScreen> {
           }
           return const Center(child: CircularProgressIndicator());
         },
+        ),
       ),
     );
   }
