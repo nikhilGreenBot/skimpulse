@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'theme.dart';
-import 'widgets/lightning_painter.dart';
+import 'widgets/panda_lightning_icon.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onSplashComplete;
@@ -123,70 +123,7 @@ class _SplashScreenState extends State<SplashScreen>
                         builder: (context, child) {
                           return Transform.scale(
                             scale: _logoAnimation.value,
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.3),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ],
-                              ),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    width: 80,
-                                    height: 80,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 5,
-                                    left: 15,
-                                    child: Container(
-                                      width: 25,
-                                      height: 25,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 5,
-                                    right: 15,
-                                    child: Container(
-                                      width: 25,
-                                      height: 25,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ),
-                                  AnimatedBuilder(
-                                    animation: _lightningAnimation,
-                                    builder: (context, child) {
-                                      return Transform.scale(
-                                        scale: _lightningAnimation.value,
-                                        child: CustomPaint(
-                                          size: const Size(40, 40),
-                                          painter: LightningPainter(),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
+                            child: const PandaLightningIcon(size: 120),
                           );
                         },
                       ),
