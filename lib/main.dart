@@ -5,6 +5,7 @@ import 'article_screen.dart';
 import 'splash_screen.dart';
 import 'theme.dart';
 import 'widgets/lightning_painter.dart';
+import 'widgets/panda_lightning_icon.dart';
 
 void main() => runApp(const SkimpulseApp());
 
@@ -177,62 +178,7 @@ class _HotScreenState extends State<HotScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Positioned(
-                    top: 1,
-                    left: 4,
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 1,
-                    right: 4,
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  CustomPaint(
-                    size: const Size(12, 12),
-                    painter: LightningPainter(),
-                  ),
-                ],
-              ),
-            ),
+            const PandaLightningIcon(size: 32),
             const SizedBox(width: 8),
             const Text("Skimpulse"),
           ],

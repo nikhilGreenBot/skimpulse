@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'main.dart';
 import 'theme.dart';
 import 'widgets/lightning_painter.dart';
+import 'widgets/panda_lightning_icon.dart';
 
 class ArticleScreen extends StatefulWidget {
   final Article article;
@@ -194,70 +195,15 @@ class _ArticleScreenState extends State<ArticleScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.primaryBlue.withValues(alpha: 0.3),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            left: 8,
-                            child: Container(
-                              width: 15,
-                              height: 15,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            right: 8,
-                            child: Container(
-                              width: 15,
-                              height: 15,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          TweenAnimationBuilder<double>(
-                            duration: const Duration(milliseconds: 1500),
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            builder: (context, value, child) {
-                              return Transform.scale(
-                                scale: 0.5 + (0.5 * value),
-                                child: CustomPaint(
-                                  size: const Size(25, 25),
-                                  painter: LightningPainter(),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 1500),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: 0.5 + (0.5 * value),
+                          child: const PandaLightningIcon(size: 50, showShadow: false),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                     Text(
