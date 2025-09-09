@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Color palette based on the panda lightning icon
-  static const Color primaryBlue = Color(0xFF4A90E2);    // Main blue from icon background
-  static const Color primaryYellow = Color(0xFFFFD700);  // Golden yellow from lightning
-  static const Color accentOrange = Color(0xFFFFA500);   // Orange accent from lightning stroke
-  static const Color darkBlue = Color(0xFF2E5A8A);       // Darker blue for contrast
-  static const Color lightBlue = Color(0xFF7BB3F0);      // Lighter blue for highlights
+  static const Color primaryBlue = Color(0xFF4A90E2);
+  static const Color primaryYellow = Color(0xFFFFD700);
+  static const Color accentOrange = Color(0xFFFFA500);
+  static const Color darkBlue = Color(0xFF2E5A8A);
+  static const Color lightBlue = Color(0xFF7BB3F0);
   
-  // Light theme
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
+    fontFamily: 'Roboto',
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryBlue,
       brightness: Brightness.light,
@@ -18,7 +17,7 @@ class AppTheme {
       secondary: primaryYellow,
       tertiary: accentOrange,
       surface: Colors.white,
-      background: const Color(0xFFF8FAFF), // Light blue tint
+      background: const Color(0xFFF8FAFF),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: primaryBlue,
@@ -61,9 +60,9 @@ class AppTheme {
     ),
   );
 
-  // Dark theme
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
+    fontFamily: 'Roboto',
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryBlue,
       brightness: Brightness.dark,

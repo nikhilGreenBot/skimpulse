@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
 import 'article_screen.dart';
 import 'splash_screen.dart';
 import 'theme.dart';
+import 'widgets/lightning_painter.dart';
 
 void main() => runApp(const SkimpulseApp());
 
@@ -107,7 +107,6 @@ class _HotScreenState extends State<HotScreen> {
           throw Exception('Failed after $_retryCount attempts. Please check your connection and try again.');
         }
         
-        // Wait longer between retries for Render's sleep mode
         await Future.delayed(Duration(seconds: _retryCount * 2));
       }
     }
@@ -175,7 +174,69 @@ class _HotScreenState extends State<HotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Skimpulse"),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Positioned(
+                    top: 1,
+                    left: 4,
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 1,
+                    right: 4,
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  CustomPaint(
+                    size: const Size(12, 12),
+                    painter: LightningPainter(),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text("Skimpulse"),
+          ],
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
@@ -228,21 +289,18 @@ class _HotScreenState extends State<HotScreen> {
                       width: 1.5,
                     ),
                     boxShadow: [
-                      // Main shadow for depth
                       BoxShadow(
                         color: AppTheme.primaryBlue.withOpacity(0.3),
                         blurRadius: 20,
                         spreadRadius: 0,
                         offset: const Offset(0, 8),
                       ),
-                      // Secondary shadow for more depth
                       BoxShadow(
                         color: AppTheme.darkBlue.withOpacity(0.2),
                         blurRadius: 40,
                         spreadRadius: 0,
                         offset: const Offset(0, 16),
                       ),
-                      // Inner highlight for glass effect
                       BoxShadow(
                         color: Colors.white.withOpacity(0.3),
                         blurRadius: 0,

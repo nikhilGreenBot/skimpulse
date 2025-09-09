@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// Import Article class from main.dart to avoid duplication
 import 'main.dart';
 import 'theme.dart';
+import 'widgets/lightning_painter.dart';
 
 class ArticleScreen extends StatefulWidget {
   final Article article;
@@ -57,8 +56,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
               });
             },
             onWebResourceError: (WebResourceError error) {
-              print('WebView error: ${error.errorCode} - ${error.description}');
-              // Only show error for critical failures, not for minor resource loading issues
               if (error.errorCode == -2 || error.errorCode == -1009 || error.errorCode == -1001) {
                 setState(() {
                   _isLoading = false;
@@ -84,40 +81,28 @@ class _ArticleScreenState extends State<ArticleScreen> {
 
   String _extractActualUrl(String skimfeedUrl) {
     try {
-      print('Extracting URL from: $skimfeedUrl');
-      
-      // Handle skimfeed redirect URLs
       if (skimfeedUrl.contains('skimfeed.com/r.php')) {
         final uri = Uri.parse(skimfeedUrl);
         final uParam = uri.queryParameters['u'];
         if (uParam != null) {
           final decodedUrl = Uri.decodeComponent(uParam);
-          print('Extracted from skimfeed: $decodedUrl');
           return decodedUrl;
         }
       }
-      
-      // Handle other common redirect patterns
       if (skimfeedUrl.contains('redirect') || skimfeedUrl.contains('url=')) {
         final uri = Uri.parse(skimfeedUrl);
-        // Try common parameter names
-        final urlParam = uri.queryParameters['url'] ?? 
-                        uri.queryParameters['u'] ?? 
-                        uri.queryParameters['link'] ??
-                        uri.queryParameters['target'];
+        final urlParam = uri.queryParameters['url'] ??
+                         uri.queryParameters['u'] ??
+                         uri.queryParameters['link'] ??
+                         uri.queryParameters['target'];
         if (urlParam != null) {
           final decodedUrl = Uri.decodeComponent(urlParam);
-          print('Extracted from redirect: $decodedUrl');
           return decodedUrl;
         }
       }
-      
-      // If no extraction needed, return as-is
-      print('No extraction needed, using original: $skimfeedUrl');
       return skimfeedUrl;
     } catch (e) {
-      print('Error extracting URL: $e');
-      return skimfeedUrl; // Fallback to original
+      return skimfeedUrl;
     }
   }
 
@@ -125,51 +110,27 @@ class _ArticleScreenState extends State<ArticleScreen> {
     try {
       final originalUrl = widget.article.url;
       final actualUrl = _extractActualUrl(originalUrl);
-      
-      // Debug logging
-      print('Original URL: $originalUrl');
-      print('Extracted URL: $actualUrl');
-      
-      // Validate URL
       if (actualUrl.isEmpty) {
         throw Exception('Empty URL after extraction');
       }
-      
       final uri = Uri.parse(actualUrl);
-      
-      // Additional validation
       if (!uri.hasScheme) {
         throw Exception('URL missing scheme (http/https)');
       }
-      
       if (!uri.hasAuthority) {
         throw Exception('URL missing domain');
       }
-      
-      print('Parsed URI: $uri');
-      print('Scheme: ${uri.scheme}');
-      print('Authority: ${uri.authority}');
-      
       if (await canLaunchUrl(uri)) {
-        print('Can launch URL, attempting to open...');
-        
-        // Try different launch modes
         try {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
-          print('URL launched successfully with externalApplication');
-        } catch (e) {
-          print('External application failed, trying platformDefault: $e');
+        } catch (_) {
           try {
             await launchUrl(uri, mode: LaunchMode.platformDefault);
-            print('URL launched successfully with platformDefault');
-          } catch (e2) {
-            print('Platform default failed, trying externalNonBrowserApplication: $e2');
+          } catch (_) {
             await launchUrl(uri, mode: LaunchMode.externalNonBrowserApplication);
-            print('URL launched successfully with externalNonBrowserApplication');
           }
         }
       } else {
-        print('Cannot launch URL');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -181,7 +142,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
         }
       }
     } catch (e) {
-      print('Error in _openInExternalBrowser: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -214,11 +174,9 @@ class _ArticleScreenState extends State<ArticleScreen> {
       ),
       body: Stack(
         children: [
-          // WebView content
           if (!_hasError && _controller != null)
             WebViewWidget(controller: _controller!),
           
-          // Loading overlay
           if (_isLoading)
             Container(
               decoration: BoxDecoration(
@@ -236,7 +194,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Animated loading icon
                     Container(
                       width: 80,
                       height: 80,
@@ -247,7 +204,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Panda face
                           Container(
                             width: 50,
                             height: 50,
@@ -263,7 +219,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
                               ],
                             ),
                           ),
-                          // Panda ears
                           Positioned(
                             top: 2,
                             left: 8,
@@ -288,7 +243,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
                               ),
                             ),
                           ),
-                          // Animated lightning bolt
                           TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 1500),
                             tween: Tween(begin: 0.0, end: 1.0),
@@ -346,7 +300,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
               ),
             ),
           
-          // Error overlay
           if (_hasError)
             Container(
               decoration: BoxDecoration(
@@ -398,7 +351,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
                                 _isLoading = true;
                                 loadingPercentage = 0;
                               });
-                              // Reload the current page instead of reinitializing
                               if (_controller != null) {
                                 _controller!.reload();
                               } else {
@@ -421,7 +373,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // Test button to verify url_launcher works
                       ElevatedButton.icon(
                         onPressed: () async {
                           try {
@@ -464,28 +415,4 @@ class _ArticleScreenState extends State<ArticleScreen> {
       ),
     );
   }
-}
-
-class LightningPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppTheme.primaryYellow
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(size.width * 0.5, size.height * 0.1);
-    path.lineTo(size.width * 0.3, size.height * 0.4);
-    path.lineTo(size.width * 0.6, size.height * 0.4);
-    path.lineTo(size.width * 0.4, size.height * 0.7);
-    path.lineTo(size.width * 0.5, size.height * 0.9);
-    path.lineTo(size.width * 0.7, size.height * 0.6);
-    path.lineTo(size.width * 0.4, size.height * 0.6);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

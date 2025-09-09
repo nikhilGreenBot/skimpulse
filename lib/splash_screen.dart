@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'theme.dart';
+import 'widgets/lightning_painter.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onSplashComplete;
@@ -25,7 +26,6 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     
-    // Initialize animation controllers
     _logoController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -41,7 +41,6 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
     );
 
-    // Define animations
     _logoAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -74,23 +73,15 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeInOut,
     ));
 
-    // Start animations in sequence
     _startAnimations();
   }
 
   void _startAnimations() async {
-    // Start logo animation
     _logoController.forward();
-    
-    // Wait a bit, then start lightning animation
     await Future.delayed(const Duration(milliseconds: 500));
     _lightningController.forward();
-    
-    // Wait a bit more, then start text animation
     await Future.delayed(const Duration(milliseconds: 300));
     _textController.forward();
-    
-    // Wait for all animations to complete, then transition
     await Future.delayed(const Duration(milliseconds: 2000));
     widget.onSplashComplete();
   }
@@ -124,7 +115,6 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo section
                   Expanded(
                     flex: 3,
                     child: Center(
@@ -150,7 +140,6 @@ class _SplashScreenState extends State<SplashScreen>
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
-                                  // Panda face
                                   Container(
                                     width: 80,
                                     height: 80,
@@ -159,7 +148,6 @@ class _SplashScreenState extends State<SplashScreen>
                                       color: Colors.white,
                                     ),
                                   ),
-                                  // Panda ears
                                   Positioned(
                                     top: 5,
                                     left: 15,
@@ -184,7 +172,6 @@ class _SplashScreenState extends State<SplashScreen>
                                       ),
                                     ),
                                   ),
-                                  // Lightning bolt
                                   AnimatedBuilder(
                                     animation: _lightningAnimation,
                                     builder: (context, child) {
@@ -206,7 +193,6 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   
-                  // Text section
                   Expanded(
                     flex: 2,
                     child: AnimatedBuilder(
@@ -263,28 +249,4 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
-}
-
-class LightningPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppTheme.primaryYellow
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(size.width * 0.5, size.height * 0.1);
-    path.lineTo(size.width * 0.3, size.height * 0.4);
-    path.lineTo(size.width * 0.6, size.height * 0.4);
-    path.lineTo(size.width * 0.4, size.height * 0.7);
-    path.lineTo(size.width * 0.5, size.height * 0.9);
-    path.lineTo(size.width * 0.7, size.height * 0.6);
-    path.lineTo(size.width * 0.4, size.height * 0.6);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
