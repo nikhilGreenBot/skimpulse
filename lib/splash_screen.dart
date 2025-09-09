@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
     ));
 
     _backgroundAnimation = ColorTween(
-      begin: AppTheme.primaryBlue.withOpacity(0.3),
+      begin: AppTheme.primaryBlue.withValues(alpha: 0.3),
       end: AppTheme.primaryBlue,
     ).animate(CurvedAnimation(
       parent: _logoController,
@@ -131,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 color: Colors.white,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
+                                    color: Colors.black.withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -219,7 +219,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   "What's Hot from Skimfeed",
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                     letterSpacing: 1,
                                   ),
                                 ),

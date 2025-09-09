@@ -17,7 +17,6 @@ class AppTheme {
       secondary: primaryYellow,
       tertiary: accentOrange,
       surface: Colors.white,
-      background: const Color(0xFFF8FAFF),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: primaryBlue,
@@ -70,7 +69,6 @@ class AppTheme {
       secondary: primaryYellow,
       tertiary: accentOrange,
       surface: const Color(0xFF1E1E1E),
-      background: const Color(0xFF121212),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: darkBlue,

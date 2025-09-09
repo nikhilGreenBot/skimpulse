@@ -184,9 +184,9 @@ class _ArticleScreenState extends State<ArticleScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.primaryBlue.withOpacity(0.1),
-                    AppTheme.primaryYellow.withOpacity(0.05),
-                    AppTheme.primaryBlue.withOpacity(0.1),
+                    AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    AppTheme.primaryYellow.withValues(alpha: 0.05),
+                    AppTheme.primaryBlue.withValues(alpha: 0.1),
                   ],
                 ),
               ),
@@ -199,7 +199,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
                       height: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppTheme.primaryBlue.withOpacity(0.1),
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                       ),
                       child: Stack(
                         alignment: Alignment.center,
@@ -212,7 +212,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.primaryBlue.withOpacity(0.3),
+                                  color: AppTheme.primaryBlue.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   spreadRadius: 2,
                                 ),
@@ -307,9 +307,9 @@ class _ArticleScreenState extends State<ArticleScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.primaryBlue.withOpacity(0.1),
-                    AppTheme.primaryYellow.withOpacity(0.05),
-                    AppTheme.primaryBlue.withOpacity(0.1),
+                    AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    AppTheme.primaryYellow.withValues(alpha: 0.05),
+                    AppTheme.primaryBlue.withValues(alpha: 0.1),
                   ],
                 ),
               ),

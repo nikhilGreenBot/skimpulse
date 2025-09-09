@@ -185,7 +185,7 @@ class _HotScreenState extends State<HotScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -255,10 +255,10 @@ class _HotScreenState extends State<HotScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppTheme.primaryBlue.withOpacity(0.15),
-              AppTheme.lightBlue.withOpacity(0.1),
-              AppTheme.primaryYellow.withOpacity(0.08),
-              AppTheme.darkBlue.withOpacity(0.12),
+              AppTheme.primaryBlue.withValues(alpha: 0.15),
+              AppTheme.lightBlue.withValues(alpha: 0.1),
+              AppTheme.primaryYellow.withValues(alpha: 0.08),
+              AppTheme.darkBlue.withValues(alpha: 0.12),
             ],
             stops: const [0.0, 0.4, 0.7, 1.0],
           ),
@@ -279,30 +279,30 @@ class _HotScreenState extends State<HotScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Colors.white.withOpacity(0.25),
-                        Colors.white.withOpacity(0.15),
-                        Colors.white.withOpacity(0.1),
+                        Colors.white.withValues(alpha: 0.25),
+                        Colors.white.withValues(alpha: 0.15),
+                        Colors.white.withValues(alpha: 0.1),
                       ],
                     ),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primaryBlue.withOpacity(0.3),
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.3),
                         blurRadius: 20,
                         spreadRadius: 0,
                         offset: const Offset(0, 8),
                       ),
                       BoxShadow(
-                        color: AppTheme.darkBlue.withOpacity(0.2),
+                        color: AppTheme.darkBlue.withValues(alpha: 0.2),
                         blurRadius: 40,
                         spreadRadius: 0,
                         offset: const Offset(0, 16),
                       ),
                       BoxShadow(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         blurRadius: 0,
                         spreadRadius: 0,
                         offset: const Offset(0, 1),
@@ -323,7 +323,7 @@ class _HotScreenState extends State<HotScreen> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.primaryBlue.withOpacity(0.4),
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.4),
                             blurRadius: 8,
                             spreadRadius: 0,
                             offset: const Offset(0, 4),
@@ -370,13 +370,13 @@ class _HotScreenState extends State<HotScreen> {
                     subtitle: Text(
                       _formatDate(),
                       style: TextStyle(
-                        color: AppTheme.darkBlue.withOpacity(0.8),
+                        color: AppTheme.darkBlue.withValues(alpha: 0.8),
                         fontSize: 12,
                         fontFamily: 'Roboto',
                         fontWeight: FontWeight.w600,
                         shadows: [
                           Shadow(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             blurRadius: 1,
                             offset: const Offset(0, 1),
                           ),
@@ -406,13 +406,13 @@ class _HotScreenState extends State<HotScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.white.withOpacity(0.98),
-                      Colors.white.withOpacity(0.95),
+                      Colors.white.withValues(alpha: 0.98),
+                      Colors.white.withValues(alpha: 0.95),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryBlue.withOpacity(0.15),
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.15),
                       blurRadius: 12,
                       spreadRadius: 2,
                       offset: const Offset(0, 4),
@@ -443,7 +443,7 @@ class _HotScreenState extends State<HotScreen> {
                           ? 'We\'re having trouble connecting to our servers.'
                           : 'Unable to load articles from the server.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                       textAlign: TextAlign.center,
                     ),
