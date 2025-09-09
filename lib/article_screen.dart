@@ -3,7 +3,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'main.dart';
 import 'theme.dart';
-import 'widgets/lightning_painter.dart';
 import 'widgets/panda_lightning_icon.dart';
 
 class ArticleScreen extends StatefulWidget {

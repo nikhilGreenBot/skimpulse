@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'article_screen.dart';
 import 'splash_screen.dart';
 import 'theme.dart';
-import 'widgets/lightning_painter.dart';
 import 'widgets/panda_lightning_icon.dart';
 
 void main() => runApp(const SkimpulseApp());

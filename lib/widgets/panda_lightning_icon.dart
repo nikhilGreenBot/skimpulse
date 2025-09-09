@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
 import 'lightning_painter.dart';
 
 class PandaLightningIcon extends StatelessWidget {
