@@ -604,32 +604,14 @@ class _HotScreenState extends State<HotScreen> {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildBottomNavItem(
                 icon: Icons.home,
                 label: 'Home',
                 isSelected: true,
-                onTap: () {},
-              ),
-              _buildBottomNavItem(
-                icon: Icons.trending_up,
-                label: 'Trending',
-                isSelected: false,
-                onTap: () {},
-              ),
-              _buildBottomNavItem(
-                icon: Icons.bookmark,
-                label: 'Saved',
-                isSelected: false,
-                onTap: () {},
-              ),
-              _buildBottomNavItem(
-                icon: Icons.person,
-                label: 'Profile',
-                isSelected: false,
                 onTap: () {},
               ),
             ],
