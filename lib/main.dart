@@ -313,100 +313,6 @@ class _HotScreenState extends State<HotScreen> {
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          PopupMenuButton<SortOption>(
-            icon: const Icon(Icons.sort),
-            tooltip: 'Sort articles',
-            onSelected: _onSortChanged,
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<SortOption>(
-                value: SortOption.original,
-                child: Row(
-                  children: [
-                    Icon(Icons.list, size: 20),
-                    SizedBox(width: 8),
-                    Text('Original Order'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<SortOption>(
-                value: SortOption.alphabetical,
-                child: Row(
-                  children: [
-                    Icon(Icons.sort_by_alpha, size: 20),
-                    SizedBox(width: 8),
-                    Text('A-Z'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<SortOption>(
-                value: SortOption.reverseAlphabetical,
-                child: Row(
-                  children: [
-                    Icon(Icons.sort_by_alpha, size: 20, textDirection: TextDirection.rtl),
-                    SizedBox(width: 8),
-                    Text('Z-A'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<SortOption>(
-                value: SortOption.rankingHigh,
-                child: Row(
-                  children: [
-                    Icon(Icons.trending_up, size: 20),
-                    SizedBox(width: 8),
-                    Text('Top Ranking'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<SortOption>(
-                value: SortOption.rankingLow,
-                child: Row(
-                  children: [
-                    Icon(Icons.trending_down, size: 20),
-                    SizedBox(width: 8),
-                    Text('Lower Ranking'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          PopupMenuButton<AppThemeMode>(
-            icon: Icon(AppTheme.getThemeIcon(widget.currentTheme)),
-            tooltip: 'Change theme',
-            onSelected: widget.onThemeChange,
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<AppThemeMode>(
-                value: AppThemeMode.light,
-                child: Row(
-                  children: [
-                    Icon(Icons.light_mode, size: 20),
-                    const SizedBox(width: 8),
-                    Text(AppTheme.getThemeName(AppThemeMode.light)),
-                  ],
-                ),
-              ),
-              PopupMenuItem<AppThemeMode>(
-                value: AppThemeMode.dark,
-                child: Row(
-                  children: [
-                    Icon(Icons.dark_mode, size: 20),
-                    const SizedBox(width: 8),
-                    Text(AppTheme.getThemeName(AppThemeMode.dark)),
-                  ],
-                ),
-              ),
-              PopupMenuItem<AppThemeMode>(
-                value: AppThemeMode.colorful,
-                child: Row(
-                  children: [
-                    Icon(Icons.palette, size: 20),
-                    const SizedBox(width: 8),
-                    Text(AppTheme.getThemeName(AppThemeMode.colorful)),
-                  ],
-                ),
-              ),
-            ],
-          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh articles',
@@ -643,6 +549,268 @@ class _HotScreenState extends State<HotScreen> {
         },
         ),
       ),
+      floatingActionButton: _buildFloatingActionButtons(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
+  }
+
+  Widget _buildFloatingActionButtons() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Theme FAB
+        FloatingActionButton(
+          heroTag: "theme_fab",
+          mini: true,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          onPressed: () => _showThemeBottomSheet(),
+          child: Icon(
+            AppTheme.getThemeIcon(widget.currentTheme),
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Sort FAB
+        FloatingActionButton(
+          heroTag: "sort_fab",
+          mini: true,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          onPressed: () => _showSortBottomSheet(),
+          child: const Icon(
+            Icons.sort,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildBottomNavItem(
+                icon: Icons.home,
+                label: 'Home',
+                isSelected: true,
+                onTap: () {},
+              ),
+              _buildBottomNavItem(
+                icon: Icons.trending_up,
+                label: 'Trending',
+                isSelected: false,
+                onTap: () {},
+              ),
+              _buildBottomNavItem(
+                icon: Icons.bookmark,
+                label: 'Saved',
+                isSelected: false,
+                onTap: () {},
+              ),
+              _buildBottomNavItem(
+                icon: Icons.person,
+                label: 'Profile',
+                isSelected: false,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavItem({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected 
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected 
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showThemeBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Choose Theme',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ...AppThemeMode.values.map((mode) => ListTile(
+              leading: Icon(AppTheme.getThemeIcon(mode)),
+              title: Text(AppTheme.getThemeName(mode)),
+              trailing: widget.currentTheme == mode 
+                  ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                  : null,
+              onTap: () {
+                widget.onThemeChange(mode);
+                Navigator.pop(context);
+              },
+            )),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSortBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Sort Articles',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ...SortOption.values.map((option) => ListTile(
+              leading: Icon(_getSortIcon(option)),
+              title: Text(_getSortLabel(option)),
+              trailing: _currentSort == option 
+                  ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                  : null,
+              onTap: () {
+                _onSortChanged(option);
+                Navigator.pop(context);
+              },
+            )),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getSortIcon(SortOption option) {
+    switch (option) {
+      case SortOption.original:
+        return Icons.list;
+      case SortOption.alphabetical:
+        return Icons.sort_by_alpha;
+      case SortOption.reverseAlphabetical:
+        return Icons.sort_by_alpha;
+      case SortOption.rankingHigh:
+        return Icons.trending_up;
+      case SortOption.rankingLow:
+        return Icons.trending_down;
+    }
+  }
+
+  String _getSortLabel(SortOption option) {
+    switch (option) {
+      case SortOption.original:
+        return 'Original Order';
+      case SortOption.alphabetical:
+        return 'A-Z';
+      case SortOption.reverseAlphabetical:
+        return 'Z-A';
+      case SortOption.rankingHigh:
+        return 'Top Ranking';
+      case SortOption.rankingLow:
+        return 'Lower Ranking';
+    }
   }
 }
