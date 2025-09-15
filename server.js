@@ -99,7 +99,8 @@ app.get('/api/skimfeed', async (req, res) => {
         
         articles.push({
           title: title,
-          url: fullUrl
+          url: fullUrl,
+          ranking: articles.length + 1 // Add ranking based on order
         });
         
         console.log(`📰 Added: "${title}" -> ${fullUrl}`);

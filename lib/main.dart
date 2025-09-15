@@ -6,6 +6,14 @@ import 'splash_screen.dart';
 import 'theme.dart';
 import 'widgets/panda_lightning_icon.dart';
 
+enum SortOption {
+  original,
+  alphabetical,
+  reverseAlphabetical,
+  rankingHigh,
+  rankingLow,
+}
+
 void main() => runApp(const SkimpulseApp());
 
 class SkimpulseApp extends StatelessWidget {
@@ -51,13 +59,19 @@ class _AppWrapperState extends State<AppWrapper> {
 class Article {
   final String title;
   final String url;
+  final int? ranking;
   
-  Article({required this.title, required this.url});
+  Article({
+    required this.title, 
+    required this.url,
+    this.ranking,
+  });
   
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
       title: json['title'] ?? '',
       url: json['url'] ?? '',
+      ranking: json['ranking'],
     );
   }
 }
@@ -73,6 +87,10 @@ class _HotScreenState extends State<HotScreen> {
   late Future<List<Article>> future;
   int _retryCount = 0;
   static const int maxRetries = 3;
+  
+  // Sorting state
+  SortOption _currentSort = SortOption.original;
+  List<Article> _originalArticles = [];
 
   @override
   void initState() {
@@ -130,7 +148,10 @@ class _HotScreenState extends State<HotScreen> {
           final articles = articlesList
               .map((article) => Article.fromJson(article))
               .toList();
-          return articles;
+          
+          // Store original articles for sorting
+          _originalArticles = List.from(articles);
+          return _sortArticles(articles);
         } else {
           throw Exception('Invalid response format: ${data.toString()}');
         }
@@ -148,6 +169,38 @@ class _HotScreenState extends State<HotScreen> {
     }
   }
 
+  List<Article> _sortArticles(List<Article> articles) {
+    switch (_currentSort) {
+      case SortOption.original:
+        return List.from(_originalArticles);
+      case SortOption.alphabetical:
+        return List.from(articles)..sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+      case SortOption.reverseAlphabetical:
+        return List.from(articles)..sort((a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+      case SortOption.rankingHigh:
+        return List.from(articles)..sort((a, b) {
+          final aRank = a.ranking ?? 999;
+          final bRank = b.ranking ?? 999;
+          return aRank.compareTo(bRank); // Lower ranking number = higher priority
+        });
+      case SortOption.rankingLow:
+        return List.from(articles)..sort((a, b) {
+          final aRank = a.ranking ?? 0;
+          final bRank = b.ranking ?? 0;
+          return bRank.compareTo(aRank); // Higher ranking number = lower priority
+        });
+    }
+  }
+
+  void _onSortChanged(SortOption newSort) {
+    setState(() {
+      _currentSort = newSort;
+      if (_originalArticles.isNotEmpty) {
+        future = Future.value(_sortArticles(_originalArticles));
+      }
+    });
+  }
+
   Future<void> _openArticle(Article article) async {
     await Navigator.push(
       context,
@@ -157,9 +210,15 @@ class _HotScreenState extends State<HotScreen> {
     );
   }
 
-  String _formatDate() {
+  String _formatDate(Article article) {
+    // Show ranking if available, otherwise show a random date
+    if (article.ranking != null) {
+      return 'Rank #${article.ranking}';
+    }
+    
+    // Fallback to random date if no ranking available
     final now = DateTime.now();
-    final random = now.millisecondsSinceEpoch % 7; // Random day within last week
+    final random = now.millisecondsSinceEpoch % 7;
     final date = now.subtract(Duration(days: random));
     
     final months = [
@@ -184,8 +243,66 @@ class _HotScreenState extends State<HotScreen> {
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          PopupMenuButton<SortOption>(
+            icon: const Icon(Icons.sort),
+            tooltip: 'Sort articles',
+            onSelected: _onSortChanged,
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<SortOption>(
+                value: SortOption.original,
+                child: Row(
+                  children: [
+                    Icon(Icons.list, size: 20),
+                    SizedBox(width: 8),
+                    Text('Original Order'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.alphabetical,
+                child: Row(
+                  children: [
+                    Icon(Icons.sort_by_alpha, size: 20),
+                    SizedBox(width: 8),
+                    Text('A-Z'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.reverseAlphabetical,
+                child: Row(
+                  children: [
+                    Icon(Icons.sort_by_alpha, size: 20, textDirection: TextDirection.rtl),
+                    SizedBox(width: 8),
+                    Text('Z-A'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.rankingHigh,
+                child: Row(
+                  children: [
+                    Icon(Icons.trending_up, size: 20),
+                    SizedBox(width: 8),
+                    Text('Top Ranking'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.rankingLow,
+                child: Row(
+                  children: [
+                    Icon(Icons.trending_down, size: 20),
+                    SizedBox(width: 8),
+                    Text('Lower Ranking'),
+                  ],
+                ),
+              ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh articles',
             onPressed: () {
               setState(() {
                 future = fetchArticlesWithRetry();
@@ -313,7 +430,7 @@ class _HotScreenState extends State<HotScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
-                      _formatDate(),
+                      _formatDate(article),
                       style: TextStyle(
                         color: AppTheme.darkBlue.withValues(alpha: 0.8),
                         fontSize: 12,
