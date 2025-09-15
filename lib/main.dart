@@ -16,23 +16,42 @@ enum SortOption {
 
 void main() => runApp(const SkimpulseApp());
 
-class SkimpulseApp extends StatelessWidget {
+class SkimpulseApp extends StatefulWidget {
   const SkimpulseApp({super.key});
-  
+
+  @override
+  State<SkimpulseApp> createState() => _SkimpulseAppState();
+}
+
+class _SkimpulseAppState extends State<SkimpulseApp> {
+  AppThemeMode _currentTheme = AppThemeMode.light;
+
+  void _changeTheme(AppThemeMode newTheme) {
+    setState(() {
+      _currentTheme = newTheme;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Skimpulse",
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      home: const AppWrapper(),
+      theme: AppTheme.getTheme(_currentTheme),
+      home: AppWrapper(onThemeChange: _changeTheme, currentTheme: _currentTheme),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class AppWrapper extends StatefulWidget {
-  const AppWrapper({super.key});
+  final Function(AppThemeMode) onThemeChange;
+  final AppThemeMode currentTheme;
+
+  const AppWrapper({
+    super.key,
+    required this.onThemeChange,
+    required this.currentTheme,
+  });
 
   @override
   State<AppWrapper> createState() => _AppWrapperState();
@@ -52,7 +71,10 @@ class _AppWrapperState extends State<AppWrapper> {
     if (_showSplash) {
       return SplashScreen(onSplashComplete: _onSplashComplete);
     }
-    return const HotScreen();
+    return HotScreen(
+      onThemeChange: widget.onThemeChange,
+      currentTheme: widget.currentTheme,
+    );
   }
 }
 
@@ -77,7 +99,14 @@ class Article {
 }
 
 class HotScreen extends StatefulWidget {
-  const HotScreen({super.key});
+  final Function(AppThemeMode) onThemeChange;
+  final AppThemeMode currentTheme;
+
+  const HotScreen({
+    super.key,
+    required this.onThemeChange,
+    required this.currentTheme,
+  });
 
   @override
   State<HotScreen> createState() => _HotScreenState();
@@ -229,6 +258,47 @@ class _HotScreenState extends State<HotScreen> {
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
+  LinearGradient _getBackgroundGradient() {
+    switch (widget.currentTheme) {
+      case AppThemeMode.light:
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.primaryBlue.withValues(alpha: 0.15),
+            AppTheme.lightBlue.withValues(alpha: 0.1),
+            AppTheme.primaryYellow.withValues(alpha: 0.08),
+            AppTheme.darkBlue.withValues(alpha: 0.12),
+          ],
+          stops: const [0.0, 0.4, 0.7, 1.0],
+        );
+      case AppThemeMode.dark:
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.darkBlue.withValues(alpha: 0.3),
+            AppTheme.primaryBlue.withValues(alpha: 0.2),
+            AppTheme.primaryYellow.withValues(alpha: 0.1),
+            Colors.black.withValues(alpha: 0.4),
+          ],
+          stops: const [0.0, 0.4, 0.7, 1.0],
+        );
+      case AppThemeMode.colorful:
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.vibrantPurple.withValues(alpha: 0.15),
+            AppTheme.vibrantPink.withValues(alpha: 0.1),
+            AppTheme.vibrantCyan.withValues(alpha: 0.08),
+            AppTheme.vibrantGreen.withValues(alpha: 0.12),
+          ],
+          stops: const [0.0, 0.4, 0.7, 1.0],
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -300,6 +370,43 @@ class _HotScreenState extends State<HotScreen> {
               ),
             ],
           ),
+          PopupMenuButton<AppThemeMode>(
+            icon: Icon(AppTheme.getThemeIcon(widget.currentTheme)),
+            tooltip: 'Change theme',
+            onSelected: widget.onThemeChange,
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<AppThemeMode>(
+                value: AppThemeMode.light,
+                child: Row(
+                  children: [
+                    Icon(Icons.light_mode, size: 20),
+                    const SizedBox(width: 8),
+                    Text(AppTheme.getThemeName(AppThemeMode.light)),
+                  ],
+                ),
+              ),
+              PopupMenuItem<AppThemeMode>(
+                value: AppThemeMode.dark,
+                child: Row(
+                  children: [
+                    Icon(Icons.dark_mode, size: 20),
+                    const SizedBox(width: 8),
+                    Text(AppTheme.getThemeName(AppThemeMode.dark)),
+                  ],
+                ),
+              ),
+              PopupMenuItem<AppThemeMode>(
+                value: AppThemeMode.colorful,
+                child: Row(
+                  children: [
+                    Icon(Icons.palette, size: 20),
+                    const SizedBox(width: 8),
+                    Text(AppTheme.getThemeName(AppThemeMode.colorful)),
+                  ],
+                ),
+              ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh articles',
@@ -313,17 +420,7 @@ class _HotScreenState extends State<HotScreen> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primaryBlue.withValues(alpha: 0.15),
-              AppTheme.lightBlue.withValues(alpha: 0.1),
-              AppTheme.primaryYellow.withValues(alpha: 0.08),
-              AppTheme.darkBlue.withValues(alpha: 0.12),
-            ],
-            stops: const [0.0, 0.4, 0.7, 1.0],
-          ),
+          gradient: _getBackgroundGradient(),
         ),
         child: FutureBuilder<List<Article>>(
         future: future,
