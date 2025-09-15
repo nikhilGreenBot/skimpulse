@@ -9,10 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-  http: ^1.2.1
+  http: ^1.1.0
   html: ^0.15.4
-  url_launcher: ^6.3.1
+  webview_flutter: ^4.3.0
+  url_launcher: ^6.2.2
+  cupertino_icons: ^1.0.2
 
 dev_dependencies:
   flutter_test:
@@ -21,3 +22,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  assets:
+    - assets/videos/
+    - assets/images/
