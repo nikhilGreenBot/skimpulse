@@ -7,7 +7,8 @@ import 'article_screen.dart';
 import 'splash_screen.dart';
 import 'theme.dart';
 import 'widgets/panda_lightning_icon.dart';
-import 'widgets/crocodile_icon.dart';
+import 'widgets/ad_banner.dart';
+import 'services/admob_service.dart';
 
 enum SortOption {
   original,
@@ -17,7 +18,14 @@ enum SortOption {
   rankingLow,
 }
 
-void main() => runApp(const SkimpulseApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize AdMob
+  await AdMobService.initialize();
+  
+  runApp(const SkimpulseApp());
+}
 
 class SkimpulseApp extends StatefulWidget {
   const SkimpulseApp({super.key});
@@ -367,7 +375,38 @@ class _HotScreenState extends State<HotScreen> {
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final article = snapshot.data![index];
+                            // Calculate total items including ads
+                            final articles = snapshot.data!;
+                            final totalItems = articles.length + (articles.length ~/ 5);
+                            
+                            if (index >= totalItems) return null;
+                            
+                            // Check if this position should show an ad
+                            if (AdManager.shouldShowAd(index)) {
+                              return TweenAnimationBuilder<double>(
+                                duration: Duration(milliseconds: 300 + (index * 50)),
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                curve: Curves.easeOutCubic,
+                                builder: (context, value, child) {
+                                  return Transform.translate(
+                                    offset: Offset(0, 20 * (1 - value)),
+                                    child: Opacity(
+                                      opacity: value,
+                                      child: AdBanner(
+                                        adId: 'ad_$index',
+                                        useAdMob: true,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+                            
+                            // Calculate article index (accounting for ads)
+                            final articleIndex = index - (index ~/ 6);
+                            if (articleIndex >= articles.length) return null;
+                            
+                            final article = articles[articleIndex];
                             return TweenAnimationBuilder<double>(
                               duration: Duration(milliseconds: 300 + (index * 100)),
                               tween: Tween(begin: 0.0, end: 1.0),
@@ -457,7 +496,7 @@ class _HotScreenState extends State<HotScreen> {
                                           child: CircleAvatar(
                                             backgroundColor: Colors.transparent,
                                             child: Text(
-                                              '${index + 1}',
+                                              '${articleIndex + 1}',
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
@@ -521,7 +560,7 @@ class _HotScreenState extends State<HotScreen> {
                               },
                             );
                           },
-                          childCount: snapshot.data!.length,
+                          childCount: snapshot.data!.length + (snapshot.data!.length ~/ 5),
                         ),
                       ),
                     ),

@@ -29,26 +29,18 @@ class CrocodileIcon extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(size / 2),
-        child: Image.asset(
-          'assets/images/1746059802366.jpg',
+        child: Container(
           width: size,
           height: size,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(size / 2),
-              ),
-              child: Icon(
-                Icons.image_not_supported,
-                size: size * 0.5,
-                color: Colors.grey[600],
-              ),
-            );
-          },
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(size / 2),
+          ),
+          child: Icon(
+            Icons.pets,
+            size: size * 0.5,
+            color: Colors.grey[600],
+          ),
         ),
       ),
     );

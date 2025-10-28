@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'theme.dart';
 import 'widgets/panda_lightning_icon.dart';
-import 'widgets/crocodile_icon.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onSplashComplete;

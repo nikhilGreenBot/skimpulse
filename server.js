@@ -25,10 +25,18 @@ app.get('/api/skimfeed', async (req, res) => {
     const $ = cheerio.load(response.data);
     const articles = [];
 
-    // Look for article links that start with r.php (these are the actual articles)
-    const links = $('a[href^="r.php"]');
+    // Look specifically for the "WHAT'S HOT" section (div with id 'popbox')
+    const whatsHotSection = $('#popbox');
     
-    console.log(`Found ${links.length} article links`);
+    if (whatsHotSection.length === 0) {
+      console.log('❌ WHAT\'S HOT section not found');
+      return res.status(404).json({ error: 'WHAT\'S HOT section not found' });
+    }
+
+    // Look for article links within the WHAT'S HOT section
+    const links = whatsHotSection.find('a[href^="r.php"]');
+    
+    console.log(`Found ${links.length} article links in WHAT'S HOT section`);
     
     links.each((index, element) => {
       const $link = $(element);
@@ -38,61 +46,9 @@ app.get('/api/skimfeed', async (req, res) => {
       // Filter for actual articles with substantial titles
       if (title && url && 
           title.length > 10 && 
-          !title.includes('Home') &&
-          !title.includes('Twitter') &&
-          !title.includes('Weather') &&
-          !title.includes('Tech News') &&
-          !title.includes('Gaming') &&
-          !title.includes('Science') &&
-          !title.includes('Design') &&
-          !title.includes('Politics') &&
-          !title.includes('Comics') &&
-          !title.includes('Football') &&
-          !title.includes('Investing') &&
-          !title.includes('MMA') &&
-          !title.includes('Mobile News') &&
-          !title.includes('Reddit') &&
-          !title.includes('Trend') &&
-          !title.includes('Watches') &&
-          !title.includes('Youtube') &&
-          !title.includes('Custom') &&
-          !title.includes('Latest') &&
-          !title.includes('Hacker News') &&
-          !title.includes('AnandTech') &&
-          !title.includes('Gizmag') &&
-          !title.includes('MakeUseOf') &&
-          !title.includes('Slashdot') &&
-          !title.includes('The Verge') &&
-          !title.includes('Wired') &&
-          !title.includes('Apple Insider') &&
-          !title.includes('World Holidays') &&
-          !title.includes('CBC Hourly News') &&
-          !title.includes('Google Plus') &&
-          !title.includes('Facebook') &&
-          !title.includes('Digg') &&
-          !title.includes('LinkedIn') &&
-          !title.includes('Blog') &&
-          !title.includes('mins') &&
-          !title.includes('©©') &&
-          !title.includes('+') &&
-          !title.includes('Fast Company') &&
-          !title.includes('Next Big Future') &&
-          !title.includes('ArsTechnica') &&
-          !title.includes('High Scalability') &&
-          !title.includes('The Tech Block') &&
-          !title.includes('Continuations') &&
-          !title.includes('Packet Storm Sec') &&
-          !title.includes('How to Geek') &&
-          !title.includes('ReadWriteWeb') &&
-          !title.includes('Copyblogger') &&
-          !title.includes('BBC Technology') &&
-          !title.includes('The Next Web') &&
-          !title.includes('Venture Beat') &&
-          !title.includes('Extreme Tech') &&
-          !title.includes('Cult of Mac') &&
-          !title.includes('Smashing Mag') &&
-          !title.includes('FastCoExist') &&
-          !title.includes('Tech in Asia')) {
+          !title.includes('©©') && // Filter out Hacker News discussion links
+          !title.includes('+') &&  // Filter out site links
+          title.trim() !== '') {
         
         // Convert relative URL to absolute URL
         const fullUrl = url.startsWith('http') ? url : `https://skimfeed.com/${url}`;
@@ -103,7 +59,7 @@ app.get('/api/skimfeed', async (req, res) => {
           ranking: articles.length + 1 // Add ranking based on order
         });
         
-        console.log(`📰 Added: "${title}" -> ${fullUrl}`);
+        console.log(`📰 Added from WHAT'S HOT: "${title}" -> ${fullUrl}`);
       }
     });
 

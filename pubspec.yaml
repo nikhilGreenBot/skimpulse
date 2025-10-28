@@ -14,6 +14,7 @@ dependencies:
   html: ^0.15.4
   webview_flutter: ^4.3.0
   url_launcher: ^6.2.2
+  google_mobile_ads: ^5.1.0
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
@@ -27,4 +28,3 @@ flutter:
   assets:
     - assets/videos/
     - assets/images/
-    - assets/images/1746059802366.jpg
