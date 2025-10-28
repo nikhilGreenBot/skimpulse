@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:ui';
 import 'article_screen.dart';
 import 'splash_screen.dart';
 import 'theme.dart';
 import 'widgets/panda_lightning_icon.dart';
+import 'widgets/crocodile_icon.dart';
 
 enum SortOption {
   original,
@@ -265,10 +268,10 @@ class _HotScreenState extends State<HotScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppTheme.primaryBlue.withValues(alpha: 0.15),
-            AppTheme.lightBlue.withValues(alpha: 0.1),
-            AppTheme.primaryYellow.withValues(alpha: 0.08),
-            AppTheme.darkBlue.withValues(alpha: 0.12),
+            AppTheme.primaryBlue.withOpacity(0.15),
+            AppTheme.lightBlue.withOpacity(0.1),
+            AppTheme.primaryYellow.withOpacity(0.08),
+            AppTheme.darkBlue.withOpacity(0.12),
           ],
           stops: const [0.0, 0.4, 0.7, 1.0],
         );
@@ -277,10 +280,10 @@ class _HotScreenState extends State<HotScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppTheme.darkBlue.withValues(alpha: 0.3),
-            AppTheme.primaryBlue.withValues(alpha: 0.2),
-            AppTheme.primaryYellow.withValues(alpha: 0.1),
-            Colors.black.withValues(alpha: 0.4),
+            AppTheme.darkBlue.withOpacity(0.3),
+            AppTheme.primaryBlue.withOpacity(0.2),
+            AppTheme.primaryYellow.withOpacity(0.1),
+            Colors.black.withOpacity(0.4),
           ],
           stops: const [0.0, 0.4, 0.7, 1.0],
         );
@@ -289,10 +292,10 @@ class _HotScreenState extends State<HotScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppTheme.vibrantPurple.withValues(alpha: 0.15),
-            AppTheme.vibrantPink.withValues(alpha: 0.1),
-            AppTheme.vibrantCyan.withValues(alpha: 0.08),
-            AppTheme.vibrantGreen.withValues(alpha: 0.12),
+            AppTheme.vibrantPurple.withOpacity(0.15),
+            AppTheme.vibrantPink.withOpacity(0.1),
+            AppTheme.vibrantCyan.withOpacity(0.08),
+            AppTheme.vibrantGreen.withOpacity(0.12),
           ],
           stops: const [0.0, 0.4, 0.7, 1.0],
         );
@@ -301,257 +304,342 @@ class _HotScreenState extends State<HotScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const PandaLightningIcon(size: 32),
-            const SizedBox(width: 8),
-            const Text("Skimpulse"),
-          ],
-        ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh articles',
-            onPressed: () {
-              setState(() {
-                future = fetchArticlesWithRetry();
-              });
-            },
-          ),
-        ],
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        statusBarIconBrightness: widget.currentTheme == AppThemeMode.dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness: widget.currentTheme == AppThemeMode.dark ? Brightness.light : Brightness.dark,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: _getBackgroundGradient(),
-        ),
-        child: FutureBuilder<List<Article>>(
-        future: future,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final article = snapshot.data![index];
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.25),
-                        Colors.white.withValues(alpha: 0.15),
-                        Colors.white.withValues(alpha: 0.1),
+    );
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          // Blurred background
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+          FutureBuilder<List<Article>>(
+            future: future,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      pinned: true,
+                      floating: true,
+                      title: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const PandaLightningIcon(size: 32),
+                          const SizedBox(width: 12),
+                          const Text("Skimpulse"),
+                        ],
+                      ),
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .inversePrimary
+                          .withOpacity(0.85),
+                      elevation: 0,
+                      actions: [
+                        IconButton(
+                          icon: const Icon(Icons.refresh),
+                          tooltip: 'Refresh articles',
+                          onPressed: () {
+                            setState(() {
+                              future = fetchArticlesWithRetry();
+                            });
+                          },
+                        ),
                       ],
                     ),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryBlue.withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        spreadRadius: 0,
-                        offset: const Offset(0, 8),
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).padding.bottom + 100,
                       ),
-                      BoxShadow(
-                        color: AppTheme.darkBlue.withValues(alpha: 0.2),
-                        blurRadius: 40,
-                        spreadRadius: 0,
-                        offset: const Offset(0, 16),
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        blurRadius: 0,
-                        spreadRadius: 0,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    leading: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppTheme.primaryBlue,
-                            AppTheme.darkBlue,
-                          ],
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final article = snapshot.data![index];
+                            return TweenAnimationBuilder<double>(
+                              duration: Duration(milliseconds: 300 + (index * 100)),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, value, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, 30 * (1 - value)),
+                                  child: Opacity(
+                                    opacity: value,
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      curve: Curves.easeInOut,
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Colors.white.withOpacity(0.3),
+                                            Colors.white.withOpacity(0.2),
+                                            Colors.white.withOpacity(0.15),
+                                          ],
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.3),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppTheme.primaryBlue
+                                                .withOpacity(0.4),
+                                            blurRadius: 25,
+                                            spreadRadius: 0,
+                                            offset: const Offset(0, 10),
+                                          ),
+                                          BoxShadow(
+                                            color: AppTheme.darkBlue
+                                                .withOpacity(0.3),
+                                            blurRadius: 50,
+                                            spreadRadius: 0,
+                                            offset: const Offset(0, 20),
+                                          ),
+                                          BoxShadow(
+                                            color: Colors.white.withOpacity(0.4),
+                                            blurRadius: 0,
+                                            spreadRadius: 0,
+                                            offset: const Offset(0, 1),
+                                          ),
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 15,
+                                            spreadRadius: 0,
+                                            offset: const Offset(0, 5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ListTile(
+                                        leading: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                AppTheme.primaryBlue,
+                                                AppTheme.darkBlue,
+                                              ],
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: AppTheme.primaryBlue
+                                                    .withOpacity(0.5),
+                                                blurRadius: 12,
+                                                spreadRadius: 0,
+                                                offset: const Offset(0, 6),
+                                              ),
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.2),
+                                                blurRadius: 8,
+                                                spreadRadius: 0,
+                                                offset: const Offset(0, 3),
+                                              ),
+                                            ],
+                                          ),
+                                          child: CircleAvatar(
+                                            backgroundColor: Colors.transparent,
+                                            child: Text(
+                                              '${index + 1}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Roboto',
+                                                shadows: [
+                                                  Shadow(
+                                                    color: Colors.black26,
+                                                    blurRadius: 2,
+                                                    offset: Offset(0, 1),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        title: Text(
+                                          article.title,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurface,
+                                            shadows: [
+                                              Shadow(
+                                                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                                                blurRadius: 1,
+                                                offset: const Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        subtitle: Text(
+                                          _formatDate(article),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                            fontWeight: FontWeight.w600,
+                                            shadows: [
+                                              Shadow(
+                                                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                                                blurRadius: 1,
+                                                offset: const Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        onTap: () => _openArticle(article),
+                                        trailing: Icon(
+                                          Icons.arrow_forward_ios,
+                                          color: AppTheme.primaryBlue,
+                                          size: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          childCount: snapshot.data!.length,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primaryBlue.withValues(alpha: 0.4),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 4),
-                          ),
+                      ),
+                    ),
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                final isFinalError = _retryCount >= maxRetries;
+                
+                return Center(
+                  child: Container(
+                    margin: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(24.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.98),
+                          Colors.white.withOpacity(0.95),
                         ],
                       ),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.transparent,
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                            color: Colors.white, 
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primaryBlue.withOpacity(0.15),
+                          blurRadius: 12,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          isFinalError ? Icons.error_outline : Icons.cloud_off,
+                          size: 64,
+                          color: isFinalError 
+                              ? Theme.of(context).colorScheme.error
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          isFinalError ? 'Something Went Wrong' : 'Connection Error',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Roboto',
-                            shadows: [
-                              Shadow(
-                                color: Colors.black26,
-                                blurRadius: 2,
-                                offset: Offset(0, 1),
-                              ),
-                            ],
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ),
-                    title: Text(
-                      article.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        fontFamily: 'Roboto',
-                        color: Colors.black,
-                        shadows: [
-                          Shadow(
-                            color: Colors.white,
-                            blurRadius: 1,
-                            offset: Offset(0, 1),
+                        const SizedBox(height: 8),
+                        Text(
+                          isFinalError 
+                              ? 'We\'re having trouble connecting to our servers.'
+                              : 'Unable to load articles from the server.',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (!isFinalError) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'Attempt $_retryCount of $maxRetries',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      _formatDate(article),
-                      style: TextStyle(
-                        color: AppTheme.darkBlue.withValues(alpha: 0.8),
-                        fontSize: 12,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w600,
-                        shadows: [
-                          Shadow(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            blurRadius: 1,
-                            offset: const Offset(0, 1),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Error: ${snapshot.error}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.error,
                           ),
-                        ],
-                      ),
-                    ),
-                    onTap: () => _openArticle(article),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios,
-                      color: AppTheme.primaryBlue,
-                      size: 16,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              future = fetchArticlesWithRetry();
+                            });
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: Text(isFinalError ? 'Try Again' : 'Retry'),
+                        ),
+                      ],
                     ),
                   ),
                 );
-              },
-            );
-          } else if (snapshot.hasError) {
-            final isFinalError = _retryCount >= maxRetries;
-            
-            return Center(
-              child: Container(
-                margin: const EdgeInsets.all(24.0),
-                padding: const EdgeInsets.all(24.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.98),
-                      Colors.white.withValues(alpha: 0.95),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.primaryBlue.withValues(alpha: 0.15),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      isFinalError ? Icons.error_outline : Icons.cloud_off,
-                      size: 64,
-                      color: isFinalError 
-                          ? Theme.of(context).colorScheme.error
-                          : Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      isFinalError ? 'Something Went Wrong' : 'Connection Error',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      isFinalError 
-                          ? 'We\'re having trouble connecting to our servers.'
-                          : 'Unable to load articles from the server.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (!isFinalError) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'Attempt $_retryCount of $maxRetries',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                    const SizedBox(height: 8),
-                    Text(
-                      'Error: ${snapshot.error}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          future = fetchArticlesWithRetry();
-                        });
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: Text(isFinalError ? 'Try Again' : 'Retry'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
-        ),
+              }
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
+
+          // FABs only (Bottom Nav Bar hidden)
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _buildFloatingActionButtons(),
+          )
+        ],
       ),
-      floatingActionButton: _buildFloatingActionButtons(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomBarWithFABs() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0, bottom: 8.0),
+          child: _buildFloatingActionButtons(),
+        ),
+        _buildBottomNavigationBar(),
+      ],
     );
   }
 
@@ -589,22 +677,29 @@ class _HotScreenState extends State<HotScreen> {
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
-          ],
-        ),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+            width: 0.5,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: SafeArea(
+        top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -630,12 +725,18 @@ class _HotScreenState extends State<HotScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected 
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected 
+              ? Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  width: 1,
+                )
+              : null,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -644,18 +745,18 @@ class _HotScreenState extends State<HotScreen> {
               icon,
               color: isSelected 
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              size: 24,
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              size: 22,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected 
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
                     ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontSize: 11,
               ),
             ),
           ],
@@ -684,7 +785,7 @@ class _HotScreenState extends State<HotScreen> {
               height: 4,
               margin: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -692,9 +793,7 @@ class _HotScreenState extends State<HotScreen> {
               padding: const EdgeInsets.all(16),
               child: Text(
                 'Choose Theme',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
             ...AppThemeMode.values.map((mode) => ListTile(
@@ -735,7 +834,7 @@ class _HotScreenState extends State<HotScreen> {
               height: 4,
               margin: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -743,9 +842,7 @@ class _HotScreenState extends State<HotScreen> {
               padding: const EdgeInsets.all(16),
               child: Text(
                 'Sort Articles',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
             ...SortOption.values.map((option) => ListTile(

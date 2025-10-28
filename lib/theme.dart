@@ -1,9 +1,124 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 enum AppThemeMode {
   light,
   dark,
   colorful,
+}
+
+class AppTypography {
+  // Primary font family for headlines and important text
+  static TextStyle get primaryFontHeadline => GoogleFonts.montserrat();
+
+  // Secondary font family for body text and UI elements
+  static TextStyle get secondaryFontBody => GoogleFonts.inter();
+
+  // Tertiary font family for special cases
+  static TextStyle get tertiaryFontSpecial => GoogleFonts.sourceSans3();
+
+  // Headline styles
+  static TextStyle get headline1 => GoogleFonts.montserrat(
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+        height: 1.2,
+        letterSpacing: -0.5,
+      );
+
+  static TextStyle get headline2 => GoogleFonts.montserrat(
+        fontSize: 28,
+        fontWeight: FontWeight.w600,
+        height: 1.3,
+        letterSpacing: -0.3,
+      );
+
+  static TextStyle get headline3 => GoogleFonts.montserrat(
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        height: 1.3,
+        letterSpacing: -0.2,
+      );
+
+  static TextStyle get headline4 => GoogleFonts.montserrat(
+        fontSize: 20,
+        fontWeight: FontWeight.w500,
+        height: 1.4,
+        letterSpacing: 0,
+      );
+
+  // Body text styles
+  static TextStyle get bodyLarge => GoogleFonts.inter(
+        fontSize: 18,
+        fontWeight: FontWeight.w400,
+        height: 1.6,
+        letterSpacing: 0.1,
+      );
+
+  static TextStyle get bodyMedium => GoogleFonts.inter(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
+        letterSpacing: 0.1,
+      );
+
+  static TextStyle get bodySmall => GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        height: 1.4,
+        letterSpacing: 0.2,
+      );
+
+  // Article title styles
+  static TextStyle get articleTitle => GoogleFonts.montserrat(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        height: 1.4,
+        letterSpacing: -0.1,
+      );
+
+  static TextStyle get articleSubtitle => GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 1.3,
+        letterSpacing: 0.1,
+      );
+
+  // UI element styles
+  static TextStyle get button => GoogleFonts.inter(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        height: 1.2,
+        letterSpacing: 0.3,
+      );
+
+  static TextStyle get caption => GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        height: 1.3,
+        letterSpacing: 0.3,
+      );
+
+  static TextStyle get overline => GoogleFonts.inter(
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+        height: 1.2,
+        letterSpacing: 1.0,
+      );
+
+  // App bar and navigation styles
+  static TextStyle get appBarTitle => GoogleFonts.montserrat(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        height: 1.2,
+        letterSpacing: -0.2,
+      );
+
+  static TextStyle get bottomNavLabel => GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        height: 1.2,
+        letterSpacing: 0.2,
+      );
 }
 
 class AppTheme {
@@ -22,7 +137,6 @@ class AppTheme {
   
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Roboto',
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryBlue,
       brightness: Brightness.light,
@@ -31,16 +145,28 @@ class AppTheme {
       tertiary: accentOrange,
       surface: Colors.white,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: primaryBlue,
+    textTheme: GoogleFonts.interTextTheme(
+      ThemeData(brightness: Brightness.light).textTheme,
+    ).copyWith(
+      headlineLarge: AppTypography.headline1,
+      headlineMedium: AppTypography.headline2,
+      headlineSmall: AppTypography.headline3,
+      titleLarge: AppTypography.headline4,
+      titleMedium: AppTypography.articleTitle,
+      titleSmall: AppTypography.articleSubtitle,
+      bodyLarge: AppTypography.bodyLarge,
+      bodyMedium: AppTypography.bodyMedium,
+      bodySmall: AppTypography.bodySmall,
+      labelLarge: AppTypography.button,
+      labelMedium: AppTypography.caption,
+      labelSmall: AppTypography.overline,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
+      titleTextStyle: AppTypography.appBarTitle.copyWith(color: Colors.white),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -74,7 +200,6 @@ class AppTheme {
 
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Roboto',
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryBlue,
       brightness: Brightness.dark,
@@ -83,16 +208,28 @@ class AppTheme {
       tertiary: accentOrange,
       surface: const Color(0xFF1E1E1E),
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: darkBlue,
+    textTheme: GoogleFonts.interTextTheme(
+      ThemeData(brightness: Brightness.dark).textTheme,
+    ).copyWith(
+      headlineLarge: AppTypography.headline1,
+      headlineMedium: AppTypography.headline2,
+      headlineSmall: AppTypography.headline3,
+      titleLarge: AppTypography.headline4,
+      titleMedium: AppTypography.articleTitle,
+      titleSmall: AppTypography.articleSubtitle,
+      bodyLarge: AppTypography.bodyLarge,
+      bodyMedium: AppTypography.bodyMedium,
+      bodySmall: AppTypography.bodySmall,
+      labelLarge: AppTypography.button,
+      labelMedium: AppTypography.caption,
+      labelSmall: AppTypography.overline,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
+      titleTextStyle: AppTypography.appBarTitle.copyWith(color: Colors.white),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -115,7 +252,6 @@ class AppTheme {
 
   static ThemeData colorfulTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Roboto',
     colorScheme: ColorScheme.fromSeed(
       seedColor: vibrantPurple,
       brightness: Brightness.light,
@@ -124,16 +260,28 @@ class AppTheme {
       tertiary: vibrantCyan,
       surface: Colors.white,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: vibrantPurple,
+    textTheme: GoogleFonts.interTextTheme(
+      ThemeData(brightness: Brightness.light).textTheme,
+    ).copyWith(
+      headlineLarge: AppTypography.headline1,
+      headlineMedium: AppTypography.headline2,
+      headlineSmall: AppTypography.headline3,
+      titleLarge: AppTypography.headline4,
+      titleMedium: AppTypography.articleTitle,
+      titleSmall: AppTypography.articleSubtitle,
+      bodyLarge: AppTypography.bodyLarge,
+      bodyMedium: AppTypography.bodyMedium,
+      bodySmall: AppTypography.bodySmall,
+      labelLarge: AppTypography.button,
+      labelMedium: AppTypography.caption,
+      labelSmall: AppTypography.overline,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
+      titleTextStyle: AppTypography.appBarTitle.copyWith(color: Colors.white),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
