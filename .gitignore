@@ -87,3 +87,6 @@ android/captures/
 # Logs
 *.log
 logs/
+
+# AdMob Configuration (contains sensitive IDs)
+lib/config/admob_config.dart

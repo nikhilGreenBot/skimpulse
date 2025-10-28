@@ -1,21 +1,23 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../config/admob_config.dart';
 
 class AdMobService {
   static bool _isInitialized = false;
   
-  static final String _bannerAdUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111' // Test Banner
-      : 'ca-app-pub-3940256099942544/6300978111';
+  // Use production IDs if available, otherwise fallback to test IDs
+  static final String _bannerAdUnitId = AdMobConfig.bannerAdUnitId != 'YOUR_BANNER_AD_UNIT_ID_HERE'
+      ? AdMobConfig.bannerAdUnitId
+      : AdMobConfig.testBannerAdUnitId;
       
-  static final String _interstitialAdUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/1033173712' // Test Interstitial
-      : 'ca-app-pub-3940256099942544/1033173712';
+  static final String _interstitialAdUnitId = AdMobConfig.interstitialAdUnitId != 'YOUR_INTERSTITIAL_AD_UNIT_ID_HERE'
+      ? AdMobConfig.interstitialAdUnitId
+      : AdMobConfig.testInterstitialAdUnitId;
       
-  static final String _rewardedAdUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/5224354917' // Test Rewarded
-      : 'ca-app-pub-3940256099942544/5224354917';
+  static final String _rewardedAdUnitId = AdMobConfig.rewardedAdUnitId != 'YOUR_REWARDED_AD_UNIT_ID_HERE'
+      ? AdMobConfig.rewardedAdUnitId
+      : AdMobConfig.testRewardedAdUnitId;
 
   static Future<void> initialize() async {
     if (_isInitialized) return;
