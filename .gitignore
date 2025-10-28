@@ -90,3 +90,9 @@ logs/
 
 # AdMob Configuration (contains sensitive IDs)
 lib/config/admob_config.dart
+
+# Android signing keys (contains sensitive information)
+android/key.properties
+android/keystore/
+*.jks
+*.keystore
