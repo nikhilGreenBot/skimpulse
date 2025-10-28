@@ -25,8 +25,10 @@ class AdMobService {
     try {
       await MobileAds.instance.initialize();
       _isInitialized = true;
+      print('✅ AdMob initialized successfully');
     } catch (e) {
-      print('Failed to initialize AdMob: $e');
+      print('❌ Failed to initialize AdMob: $e');
+      _isInitialized = false;
     }
   }
 
@@ -66,18 +68,21 @@ class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
   }
 
   void _loadAd() {
+    print('🔄 Loading AdMob banner with ID: ${widget.adUnitId}');
     _bannerAd = BannerAd(
       adUnitId: widget.adUnitId,
       size: widget.adSize,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
+          print('✅ AdMob banner loaded successfully');
           setState(() {
             _isAdLoaded = true;
           });
           widget.onAdLoaded?.call();
         },
         onAdFailedToLoad: (ad, error) {
+          print('❌ AdMob banner failed to load: ${error.message}');
           ad.dispose();
           widget.onAdFailedToLoad?.call();
         },
@@ -96,7 +101,29 @@ class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
   @override
   Widget build(BuildContext context) {
     if (!_isAdLoaded || _bannerAd == null) {
-      return const SizedBox.shrink();
+      // Show a placeholder while ad is loading
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.blue.withOpacity(0.1),
+          border: Border.all(
+            color: Colors.blue.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: const Center(
+          child: Text(
+            'Loading Ad...',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      );
     }
 
     return Container(

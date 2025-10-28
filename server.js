@@ -25,8 +25,11 @@ app.get('/api/skimfeed', async (req, res) => {
     const $ = cheerio.load(response.data);
     const articles = [];
 
-    // Look specifically for the "WHAT'S HOT" section (div with id 'popbox')
-    const whatsHotSection = $('#popbox');
+    // Look specifically for the "WHAT'S HOT" section
+    // The WHAT'S HOT section is in a div with class 'boxes' that contains a span with 'WHAT'S HOT' text
+    const whatsHotSection = $('.boxes').filter(function() {
+      return $(this).find('span.boxtitles h2 a.popurltitle').text().includes("WHAT'S HOT");
+    });
     
     if (whatsHotSection.length === 0) {
       console.log('❌ WHAT\'S HOT section not found');

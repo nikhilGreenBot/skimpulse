@@ -153,7 +153,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  "What's Hot from Skimfeed",
+                                  "Latest from Skimfeed",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.white.withValues(alpha: 0.8),

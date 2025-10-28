@@ -22,6 +22,8 @@ class AdBanner extends StatefulWidget {
 class _AdBannerState extends State<AdBanner> {
   @override
   Widget build(BuildContext context) {
+    print('🎯 Building ad banner for ${widget.adId}, AdMob initialized: ${AdMobService.isInitialized}');
+    
     if (widget.useAdMob && AdMobService.isInitialized) {
       return AdMobBannerWidget(
         adUnitId: AdMobService.bannerAdUnitId,
@@ -36,6 +38,7 @@ class _AdBannerState extends State<AdBanner> {
     }
 
     // Fallback to placeholder ad if AdMob is not available
+    print('🔄 Using placeholder ad for ${widget.adId}');
     return _buildPlaceholderAd(context);
   }
 
@@ -150,7 +153,7 @@ class _AdBannerState extends State<AdBanner> {
 
 class AdManager {
   static bool shouldShowAd(int itemIndex) {
-    // Show ads after every 5 articles, starting from the 3rd position
-    return itemIndex > 0 && (itemIndex + 1) % 5 == 0;
+    // Show ads after every 5 articles, starting from the 5th position (index 4)
+    return itemIndex > 0 && (itemIndex + 1) % 6 == 0;
   }
 }

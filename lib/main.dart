@@ -251,64 +251,15 @@ class _HotScreenState extends State<HotScreen> {
   }
 
   String _formatDate(Article article) {
-    // Show ranking if available, otherwise show a random date
+    // Show ranking as the primary identifier
     if (article.ranking != null) {
       return 'Rank #${article.ranking}';
     }
     
-    // Fallback to random date if no ranking available
-    final now = DateTime.now();
-    final random = now.millisecondsSinceEpoch % 7;
-    final date = now.subtract(Duration(days: random));
-    
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    // Fallback
+    return 'Latest';
   }
 
-  LinearGradient _getBackgroundGradient() {
-    switch (widget.currentTheme) {
-      case AppThemeMode.light:
-        return LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppTheme.primaryBlue.withOpacity(0.15),
-            AppTheme.lightBlue.withOpacity(0.1),
-            AppTheme.primaryYellow.withOpacity(0.08),
-            AppTheme.darkBlue.withOpacity(0.12),
-          ],
-          stops: const [0.0, 0.4, 0.7, 1.0],
-        );
-      case AppThemeMode.dark:
-        return LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppTheme.darkBlue.withOpacity(0.3),
-            AppTheme.primaryBlue.withOpacity(0.2),
-            AppTheme.primaryYellow.withOpacity(0.1),
-            Colors.black.withOpacity(0.4),
-          ],
-          stops: const [0.0, 0.4, 0.7, 1.0],
-        );
-      case AppThemeMode.colorful:
-        return LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppTheme.vibrantPurple.withOpacity(0.15),
-            AppTheme.vibrantPink.withOpacity(0.1),
-            AppTheme.vibrantCyan.withOpacity(0.08),
-            AppTheme.vibrantGreen.withOpacity(0.12),
-          ],
-          stops: const [0.0, 0.4, 0.7, 1.0],
-        );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -383,6 +334,7 @@ class _HotScreenState extends State<HotScreen> {
                             
                             // Check if this position should show an ad
                             if (AdManager.shouldShowAd(index)) {
+                              print('🎯 Showing ad at index $index');
                               return TweenAnimationBuilder<double>(
                                 duration: Duration(milliseconds: 300 + (index * 50)),
                                 tween: Tween(begin: 0.0, end: 1.0),
@@ -668,19 +620,6 @@ class _HotScreenState extends State<HotScreen> {
     );
   }
 
-  Widget _buildBottomBarWithFABs() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 16.0, bottom: 8.0),
-          child: _buildFloatingActionButtons(),
-        ),
-        _buildBottomNavigationBar(),
-      ],
-    );
-  }
 
   Widget _buildFloatingActionButtons() {
     return Column(
