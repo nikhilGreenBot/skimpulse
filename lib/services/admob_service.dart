@@ -6,18 +6,9 @@ import '../config/admob_config.dart';
 class AdMobService {
   static bool _isInitialized = false;
   
-  // Use production IDs if available, otherwise fallback to test IDs
-  static final String _bannerAdUnitId = AdMobConfig.bannerAdUnitId != 'YOUR_BANNER_AD_UNIT_ID_HERE'
-      ? AdMobConfig.bannerAdUnitId
-      : AdMobConfig.testBannerAdUnitId;
-      
-  static final String _interstitialAdUnitId = AdMobConfig.interstitialAdUnitId != 'YOUR_INTERSTITIAL_AD_UNIT_ID_HERE'
-      ? AdMobConfig.interstitialAdUnitId
-      : AdMobConfig.testInterstitialAdUnitId;
-      
-  static final String _rewardedAdUnitId = AdMobConfig.rewardedAdUnitId != 'YOUR_REWARDED_AD_UNIT_ID_HERE'
-      ? AdMobConfig.rewardedAdUnitId
-      : AdMobConfig.testRewardedAdUnitId;
+  static final String _bannerAdUnitId = AdMobConfig.testBannerAdUnitId;
+  static final String _interstitialAdUnitId = AdMobConfig.testInterstitialAdUnitId;
+  static final String _rewardedAdUnitId = AdMobConfig.testRewardedAdUnitId;
 
   static Future<void> initialize() async {
     if (_isInitialized) return;
@@ -25,9 +16,7 @@ class AdMobService {
     try {
       await MobileAds.instance.initialize();
       _isInitialized = true;
-      print('✅ AdMob initialized successfully');
     } catch (e) {
-      print('❌ Failed to initialize AdMob: $e');
       _isInitialized = false;
     }
   }
@@ -68,23 +57,28 @@ class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
   }
 
   void _loadAd() {
-    print('🔄 Loading AdMob banner with ID: ${widget.adUnitId}');
     _bannerAd = BannerAd(
       adUnitId: widget.adUnitId,
       size: widget.adSize,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          print('✅ AdMob banner loaded successfully');
           setState(() {
             _isAdLoaded = true;
           });
           widget.onAdLoaded?.call();
         },
         onAdFailedToLoad: (ad, error) {
-          print('❌ AdMob banner failed to load: ${error.message}');
           ad.dispose();
           widget.onAdFailedToLoad?.call();
+          
+          if (error.code == 1) {
+            Future.delayed(const Duration(seconds: 5), () {
+              if (mounted) {
+                _loadAd();
+              }
+            });
+          }
         },
       ),
     );
@@ -101,7 +95,6 @@ class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
   @override
   Widget build(BuildContext context) {
     if (!_isAdLoaded || _bannerAd == null) {
-      // Show a placeholder while ad is loading
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         height: 50,
