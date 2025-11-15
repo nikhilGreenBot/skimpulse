@@ -70,11 +70,101 @@ class AppWrapper extends StatefulWidget {
 
 class _AppWrapperState extends State<AppWrapper> {
   bool _showSplash = true;
+  late Future<List<Article>> _preloadedFuture;
 
-  void _onSplashComplete() {
-    setState(() {
-      _showSplash = false;
-    });
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fetch articles during splash screen
+    _preloadedFuture = _preloadArticles();
+  }
+
+  Future<List<Article>> _preloadArticles() async {
+    // Minimum splash duration to show animations nicely
+    final minimumSplashDuration = const Duration(milliseconds: 2800);
+    final startTime = DateTime.now();
+
+    try {
+      // Start fetching articles immediately
+      final articles = await _fetchArticlesWithRetry();
+      
+      // Ensure minimum splash duration
+      final elapsed = DateTime.now().difference(startTime);
+      if (elapsed < minimumSplashDuration) {
+        await Future.delayed(minimumSplashDuration - elapsed);
+      }
+      
+      return articles;
+    } catch (e) {
+      // Even if fetch fails, wait for minimum splash duration
+      final elapsed = DateTime.now().difference(startTime);
+      if (elapsed < minimumSplashDuration) {
+        await Future.delayed(minimumSplashDuration - elapsed);
+      }
+      rethrow;
+    }
+  }
+
+  Future<List<Article>> _fetchArticlesWithRetry() async {
+    int retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      try {
+        return await _fetchArticles();
+      } catch (e) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          throw Exception('Failed after $retryCount attempts. Please check your connection and try again.');
+        }
+        await Future.delayed(Duration(seconds: retryCount * 2));
+      }
+    }
+    throw Exception('Unexpected error in retry logic');
+  }
+
+  Future<List<Article>> _fetchArticles() async {
+    const String productionApiUrl = 'https://api-deploy-9so9.onrender.com';
+    const String customApiUrl = String.fromEnvironment('API_URL');
+    
+    final apiUrl = customApiUrl.isNotEmpty 
+        ? '$customApiUrl/api/skimfeed'
+        : '$productionApiUrl/api/skimfeed';
+    
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: {'Content-Type': 'application/json'},
+    ).timeout(const Duration(seconds: 30));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      
+      if (data['success'] == true && data['articles'] is List) {
+        final List<dynamic> articlesList = data['articles'] as List;
+        return articlesList
+            .map((article) => Article.fromJson(article))
+            .toList();
+      } else {
+        throw Exception('Invalid response format: ${data.toString()}');
+      }
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  void _onSplashComplete() async {
+    // Wait for data to be preloaded before transitioning
+    try {
+      await _preloadedFuture;
+    } catch (e) {
+      // Even if data load fails, proceed to main screen to show error
+    }
+    
+    if (mounted) {
+      setState(() {
+        _showSplash = false;
+      });
+    }
   }
 
   @override
@@ -85,6 +175,7 @@ class _AppWrapperState extends State<AppWrapper> {
     return HotScreen(
       onThemeChange: widget.onThemeChange,
       currentTheme: widget.currentTheme,
+      preloadedFuture: _preloadedFuture,
     );
   }
 }
@@ -112,11 +203,13 @@ class Article {
 class HotScreen extends StatefulWidget {
   final Function(AppThemeMode) onThemeChange;
   final AppThemeMode currentTheme;
+  final Future<List<Article>>? preloadedFuture;
 
   const HotScreen({
     super.key,
     required this.onThemeChange,
     required this.currentTheme,
+    this.preloadedFuture,
   });
 
   @override
@@ -127,6 +220,8 @@ class _HotScreenState extends State<HotScreen> {
   late Future<List<Article>> future;
   int _retryCount = 0;
   static const int maxRetries = 3;
+  final ScrollController _scrollController = ScrollController();
+  bool _isRefreshing = false;
   
   // Sorting state
   SortOption _currentSort = SortOption.original;
@@ -135,7 +230,48 @@ class _HotScreenState extends State<HotScreen> {
   @override
   void initState() {
     super.initState();
-    future = fetchArticlesWithRetry();
+    // Use preloaded future if available, otherwise fetch
+    future = widget.preloadedFuture ?? fetchArticlesWithRetry();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRefresh() async {
+    // Set refreshing state immediately to show overlay
+    if (mounted) {
+      setState(() {
+        _isRefreshing = true;
+        _retryCount = 0;
+      });
+    }
+    
+    // Ensure UI updates immediately
+    await Future.microtask(() {});
+    
+    try {
+      final refreshedArticles = await fetchArticlesWithRetry();
+      if (mounted) {
+        setState(() {
+          future = Future.value(refreshedArticles);
+          _isRefreshing = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          future = Future.error(e);
+          _isRefreshing = false;
+        });
+      }
+    }
+  }
+
+  void _refreshFromButton() {
+    _handleRefresh();
   }
 
   String _getApiUrl() {
@@ -289,8 +425,20 @@ class _HotScreenState extends State<HotScreen> {
             future: future,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return CustomScrollView(
-                  slivers: [
+                return Stack(
+                  children: [
+                    // Pull-to-refresh commented out for now
+                    // RefreshIndicator(
+                    //   onRefresh: _handleRefresh,
+                    //   notificationPredicate: (_) => false, // Hide default RefreshIndicator spinner
+                    //   child: CustomScrollView(
+                    //     controller: _scrollController,
+                    //     physics: const AlwaysScrollableScrollPhysics(),
+                    //     slivers: [
+                    CustomScrollView(
+                      controller: _scrollController,
+                      physics: const ClampingScrollPhysics(),
+                      slivers: [
                     SliverAppBar(
                       pinned: true,
                       floating: true,
@@ -309,13 +457,17 @@ class _HotScreenState extends State<HotScreen> {
                       elevation: 0,
                       actions: [
                         IconButton(
-                          icon: const Icon(Icons.refresh),
+                          icon: _isRefreshing 
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh),
                           tooltip: 'Refresh articles',
-                          onPressed: () {
-                            setState(() {
-                              future = fetchArticlesWithRetry();
-                            });
-                          },
+                          onPressed: _isRefreshing ? null : _refreshFromButton,
                         ),
                       ],
                     ),
@@ -517,6 +669,57 @@ class _HotScreenState extends State<HotScreen> {
                       ),
                     ),
                   ],
+                    // ), // End of RefreshIndicator
+                    ), // End of CustomScrollView
+                    // Refresh overlay with centered loader
+                    AnimatedOpacity(
+                      opacity: _isRefreshing ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Visibility(
+                        visible: _isRefreshing,
+                        child: Positioned.fill(
+                          child: AbsorbPointer(
+                            child: Container(
+                              color: Colors.black.withOpacity(0.6),
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).scaffoldBackgroundColor,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 20,
+                                        spreadRadius: 5,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        strokeWidth: 3,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Refreshing articles...',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               } else if (snapshot.hasError) {
                 final isFinalError = _retryCount >= maxRetries;
@@ -592,12 +795,16 @@ class _HotScreenState extends State<HotScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              future = fetchArticlesWithRetry();
-                            });
-                          },
-                          icon: const Icon(Icons.refresh),
+                          onPressed: _isRefreshing ? null : _refreshFromButton,
+                          icon: _isRefreshing 
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh),
                           label: Text(isFinalError ? 'Try Again' : 'Retry'),
                         ),
                       ],
@@ -605,7 +812,38 @@ class _HotScreenState extends State<HotScreen> {
                   ),
                 );
               }
-              return const Center(child: CircularProgressIndicator());
+              // Loading state - show splash-like design instead of black screen
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppTheme.primaryBlue,
+                      AppTheme.darkBlue,
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const PandaLightningIcon(size: 80),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.primaryYellow,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
           ),
 

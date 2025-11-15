@@ -27,7 +27,7 @@
 
 **Credit**: This app utilizes data from [skimfeed.com](https://skimfeed.com) for news aggregation. I, Nikhil am  grateful to skimfeed.com for providing access to their curated technology news feed.
 
-**Content Disclaimer**: The views and opinions expressed in the linked articles are those of the original authors and do not necessarily reflect the views of Skimpulse or its developers.
+**Content Disclaimer**: The views and opinions expressed in the linked articles are those of the original authors and do not necessarily reflect the views of Skimpulse or its developer.
 
 ## Trademark & Legal
 

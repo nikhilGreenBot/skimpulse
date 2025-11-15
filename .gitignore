@@ -64,6 +64,13 @@ ios/Runner.xcworkspace/xcuserdata/
 ios/Runner.xcodeproj/xcuserdata/
 ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
 
+# macOS specific
+macos/Podfile.lock
+.DS_Store
+*.swp
+*.swo
+*~
+
 # Android specific
 android/.gradle/
 android/app/build/
@@ -71,11 +78,10 @@ android/local.properties
 android/.idea/
 android/captures/
 
-# macOS specific
-.DS_Store
-*.swp
-*.swo
-*~
+# Backup files
+*.bak
+*.backup
+*.tmp
 
 # IDE specific
 .vscode/
