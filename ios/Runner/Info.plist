@@ -46,12 +46,122 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-1295716450289633~1054157446</string>
 	<key>SKAdNetworkItems</key>
 	<array>
+		<!-- Google AdMob -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+		<!-- Meta Audience Network (Facebook) -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v9wttpbfk9.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>n38lu8286q.skadnetwork</string>
+		</dict>
+		<!-- Unity Ads -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>4dzt52r2t5.skadnetwork</string>
+		</dict>
+		<!-- AppLovin -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>ludvb6z3bs.skadnetwork</string>
+		</dict>
+		<!-- ironSource -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>su67r6k2v3.skadnetwork</string>
+		</dict>
+		<!-- Vungle -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>gta9lk7p23.skadnetwork</string>
+		</dict>
+		<!-- AdColony -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>4fzdc2evr5.skadnetwork</string>
+		</dict>
+		<!-- Chartboost -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>f73kdq92p3.skadnetwork</string>
+		</dict>
+		<!-- InMobi -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>s39g8k73mm.skadnetwork</string>
+		</dict>
+		<!-- Tapjoy -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>r3f5yu43ve.skadnetwork</string>
+		</dict>
+		<!-- TikTok -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>22mmun2rn5.skadnetwork</string>
+		</dict>
+		<!-- Snapchat -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>424m5254lk.skadnetwork</string>
+		</dict>
+		<!-- Yahoo -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v72qych5uu.skadnetwork</string>
+		</dict>
+		<!-- Amazon -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>p78axxw29g.skadnetwork</string>
+		</dict>
+		<!-- Digital Turbine -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>hs6bdukanm.skadnetwork</string>
+		</dict>
+		<!-- Liftoff -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>wzmmz9fp6w.skadnetwork</string>
+		</dict>
+		<!-- Fyber -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>y5ghdn5j9q.skadnetwork</string>
+		</dict>
+		<!-- Mintegral -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>kbd757ywx3.skadnetwork</string>
+		</dict>
+		<!-- PubNative -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v4nxqhlyqp.skadnetwork</string>
+		</dict>
+		<!-- Smaato -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>3qy4746246.skadnetwork</string>
+		</dict>
+		<!-- Start.io -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>prcb7njmu6.skadnetwork</string>
+		</dict>
+		<!-- Verve -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>578prtvx9j.skadnetwork</string>
 		</dict>
 	</array>
 </dict>

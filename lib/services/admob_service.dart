@@ -6,9 +6,10 @@ import '../config/admob_config.dart';
 class AdMobService {
   static bool _isInitialized = false;
   
-  static final String _bannerAdUnitId = AdMobConfig.testBannerAdUnitId;
-  static final String _interstitialAdUnitId = AdMobConfig.testInterstitialAdUnitId;
-  static final String _rewardedAdUnitId = AdMobConfig.testRewardedAdUnitId;
+  // Production Ad Unit IDs
+  static final String _bannerAdUnitId = AdMobConfig.bannerAdUnitId;
+  static final String _interstitialAdUnitId = AdMobConfig.interstitialAdUnitId;
+  static final String _rewardedAdUnitId = AdMobConfig.rewardedAdUnitId;
 
   static Future<void> initialize() async {
     if (_isInitialized) return;
