@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 import 'dart:ui';
 import 'article_screen.dart';
 import 'splash_screen.dart';
 import 'theme.dart';
 import 'widgets/panda_lightning_icon.dart';
 import 'widgets/ad_banner.dart';
+import 'widgets/forced_update_dialog.dart';
 import 'services/admob_service.dart';
+import 'services/version_service.dart';
 
 enum SortOption {
   original,
@@ -71,22 +74,51 @@ class AppWrapper extends StatefulWidget {
 class _AppWrapperState extends State<AppWrapper> {
   bool _showSplash = true;
   late Future<List<Article>> _preloadedFuture;
+  VersionInfo? _versionInfo;
+  bool _showUpdateDialog = false;
 
   @override
   void initState() {
     super.initState();
-    // Pre-fetch articles during splash screen
+    // Check version first, then pre-fetch articles
+    _checkVersionAndPreload();
+  }
+
+  Future<void> _checkVersionAndPreload() async {
+    // Check version in parallel with preloading
+    final versionCheck = VersionService.checkVersion();
     _preloadedFuture = _preloadArticles();
+    
+    // Wait for version check
+    _versionInfo = await versionCheck;
+    
+    // Check if forced update is required
+    if (_versionInfo != null && 
+        (_versionInfo!.forceUpdate || _versionInfo!.needsUpdate)) {
+      if (mounted) {
+        setState(() {
+          _showUpdateDialog = true;
+        });
+      }
+    }
   }
 
   Future<List<Article>> _preloadArticles() async {
     // Minimum splash duration to show animations nicely
     final minimumSplashDuration = const Duration(milliseconds: 2800);
+    // Maximum total timeout to prevent infinite waiting
+    const maximumTimeout = Duration(seconds: 15);
     final startTime = DateTime.now();
 
     try {
-      // Start fetching articles immediately
-      final articles = await _fetchArticlesWithRetry();
+      // Start fetching articles with timeout
+      final articles = await _fetchArticlesWithRetry()
+          .timeout(maximumTimeout, onTimeout: () {
+        throw TimeoutException(
+          'Request timed out after ${maximumTimeout.inSeconds} seconds',
+          maximumTimeout,
+        );
+      });
       
       // Ensure minimum splash duration
       final elapsed = DateTime.now().difference(startTime);
@@ -96,18 +128,22 @@ class _AppWrapperState extends State<AppWrapper> {
       
       return articles;
     } catch (e) {
-      // Even if fetch fails, wait for minimum splash duration
+      // Even if fetch fails, wait for minimum splash duration (but don't exceed max)
       final elapsed = DateTime.now().difference(startTime);
-      if (elapsed < minimumSplashDuration) {
-        await Future.delayed(minimumSplashDuration - elapsed);
+      final remainingMinTime = minimumSplashDuration - elapsed;
+      if (remainingMinTime > Duration.zero && 
+          elapsed < maximumTimeout - const Duration(seconds: 1)) {
+        await Future.delayed(remainingMinTime);
       }
-      rethrow;
+      // Return empty list instead of throwing to allow app to continue
+      // The main screen will show an error state
+      return [];
     }
   }
 
   Future<List<Article>> _fetchArticlesWithRetry() async {
     int retryCount = 0;
-    const maxRetries = 3;
+    const maxRetries = 2; // Reduced from 3 to prevent long waits
     
     while (retryCount < maxRetries) {
       try {
@@ -115,12 +151,14 @@ class _AppWrapperState extends State<AppWrapper> {
       } catch (e) {
         retryCount++;
         if (retryCount >= maxRetries) {
-          throw Exception('Failed after $retryCount attempts. Please check your connection and try again.');
+          // Return empty list instead of throwing to allow app to continue
+          return [];
         }
-        await Future.delayed(Duration(seconds: retryCount * 2));
+        // Shorter delay between retries
+        await Future.delayed(Duration(seconds: retryCount));
       }
     }
-    throw Exception('Unexpected error in retry logic');
+    return [];
   }
 
   Future<List<Article>> _fetchArticles() async {
@@ -131,10 +169,11 @@ class _AppWrapperState extends State<AppWrapper> {
         ? '$customApiUrl/api/skimfeed'
         : '$productionApiUrl/api/skimfeed';
     
+    // Reduced timeout from 30s to 10s to fail faster
     final response = await http.get(
       Uri.parse(apiUrl),
       headers: {'Content-Type': 'application/json'},
-    ).timeout(const Duration(seconds: 30));
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -153,11 +192,25 @@ class _AppWrapperState extends State<AppWrapper> {
   }
 
   void _onSplashComplete() async {
-    // Wait for data to be preloaded before transitioning
+    // Wait for data to be preloaded before transitioning (with timeout)
     try {
-      await _preloadedFuture;
+      await _preloadedFuture.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => <Article>[],
+      );
     } catch (e) {
       // Even if data load fails, proceed to main screen to show error
+    }
+    
+    // Don't proceed if forced update is required
+    if (_versionInfo != null && 
+        (_versionInfo!.forceUpdate || _versionInfo!.needsUpdate)) {
+      if (mounted) {
+        setState(() {
+          _showUpdateDialog = true;
+        });
+      }
+      return;
     }
     
     if (mounted) {
@@ -169,6 +222,19 @@ class _AppWrapperState extends State<AppWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    // Show forced update dialog if needed
+    if (_showUpdateDialog && _versionInfo != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => ForcedUpdateDialog(versionInfo: _versionInfo!),
+          );
+        }
+      });
+    }
+    
     if (_showSplash) {
       return SplashScreen(onSplashComplete: _onSplashComplete);
     }
@@ -427,14 +493,6 @@ class _HotScreenState extends State<HotScreen> {
               if (snapshot.hasData) {
                 return Stack(
                   children: [
-                    // Pull-to-refresh commented out for now
-                    // RefreshIndicator(
-                    //   onRefresh: _handleRefresh,
-                    //   notificationPredicate: (_) => false, // Hide default RefreshIndicator spinner
-                    //   child: CustomScrollView(
-                    //     controller: _scrollController,
-                    //     physics: const AlwaysScrollableScrollPhysics(),
-                    //     slivers: [
                     CustomScrollView(
                       controller: _scrollController,
                       physics: const ClampingScrollPhysics(),
@@ -447,7 +505,12 @@ class _HotScreenState extends State<HotScreen> {
                         children: [
                           const PandaLightningIcon(size: 32),
                           const SizedBox(width: 12),
-                          const Text("Skimpulse"),
+                          Flexible(
+                            child: Text(
+                              "Skimpulse",
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       backgroundColor: Theme.of(context)
@@ -478,11 +541,27 @@ class _HotScreenState extends State<HotScreen> {
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            // Calculate total items including ads
+                            // Calculate total items including ads and attribution
                             final articles = snapshot.data!;
                             final totalItems = articles.length + (articles.length ~/ 5);
+                            final totalWithAttribution = totalItems + 1;
                             
-                            if (index >= totalItems) return null;
+                            if (index >= totalWithAttribution) return null;
+                            
+                            // Show attribution at the end
+                            if (index == totalItems) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                                child: Text(
+                                  'Made with ❤️ by Nikhil Bastikar',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            }
                             
                             // Check if this position should show an ad
                             if (AdManager.shouldShowAd(index)) {
@@ -520,82 +599,29 @@ class _HotScreenState extends State<HotScreen> {
                                   offset: Offset(0, 30 * (1 - value)),
                                   child: Opacity(
                                     opacity: value,
-                                    child: AnimatedContainer(
+                                      child: AnimatedContainer(
                                       duration: const Duration(milliseconds: 200),
                                       curve: Curves.easeInOut,
                                       margin: const EdgeInsets.symmetric(
                                           horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(16),
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            Colors.white.withOpacity(0.3),
-                                            Colors.white.withOpacity(0.2),
-                                            Colors.white.withOpacity(0.15),
-                                          ],
-                                        ),
+                                        gradient: _getArticleCardGradient(widget.currentTheme),
                                         border: Border.all(
-                                          color: Colors.white.withOpacity(0.3),
+                                          color: _getArticleCardBorderColor(widget.currentTheme),
                                           width: 1.5,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppTheme.primaryBlue
-                                                .withOpacity(0.4),
-                                            blurRadius: 25,
-                                            spreadRadius: 0,
-                                            offset: const Offset(0, 10),
-                                          ),
-                                          BoxShadow(
-                                            color: AppTheme.darkBlue
-                                                .withOpacity(0.3),
-                                            blurRadius: 50,
-                                            spreadRadius: 0,
-                                            offset: const Offset(0, 20),
-                                          ),
-                                          BoxShadow(
-                                            color: Colors.white.withOpacity(0.4),
-                                            blurRadius: 0,
-                                            spreadRadius: 0,
-                                            offset: const Offset(0, 1),
-                                          ),
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
-                                            blurRadius: 15,
-                                            spreadRadius: 0,
-                                            offset: const Offset(0, 5),
-                                          ),
-                                        ],
+                                        boxShadow: _getArticleCardShadows(widget.currentTheme),
                                       ),
                                       child: ListTile(
+                                        dense: true,
+                                        isThreeLine: false,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                         leading: Container(
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                AppTheme.primaryBlue,
-                                                AppTheme.darkBlue,
-                                              ],
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: AppTheme.primaryBlue
-                                                    .withOpacity(0.5),
-                                                blurRadius: 12,
-                                                spreadRadius: 0,
-                                                offset: const Offset(0, 6),
-                                              ),
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
-                                                blurRadius: 8,
-                                                spreadRadius: 0,
-                                                offset: const Offset(0, 3),
-                                              ),
-                                            ],
+                                            gradient: _getNumberBadgeGradient(widget.currentTheme),
+                                            boxShadow: _getNumberBadgeShadows(widget.currentTheme),
                                           ),
                                           child: CircleAvatar(
                                             backgroundColor: Colors.transparent,
@@ -652,10 +678,13 @@ class _HotScreenState extends State<HotScreen> {
                                           ),
                                         ),
                                         onTap: () => _openArticle(article),
-                                        trailing: Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: AppTheme.primaryBlue,
-                                          size: 16,
+                                        trailing: Padding(
+                                          padding: const EdgeInsets.only(left: 8.0),
+                                          child: Icon(
+                                            Icons.arrow_forward_ios,
+                                            color: AppTheme.primaryBlue,
+                                            size: 16,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -664,12 +693,11 @@ class _HotScreenState extends State<HotScreen> {
                               },
                             );
                           },
-                          childCount: snapshot.data!.length + (snapshot.data!.length ~/ 5),
+                          childCount: snapshot.data!.length + (snapshot.data!.length ~/ 5) + 1, // +1 for attribution
                         ),
                       ),
                     ),
                   ],
-                    // ), // End of RefreshIndicator
                     ), // End of CustomScrollView
                     // Refresh overlay with centered loader
                     AnimatedOpacity(
@@ -847,7 +875,6 @@ class _HotScreenState extends State<HotScreen> {
             },
           ),
 
-          // FABs only (Bottom Nav Bar hidden)
           Positioned(
             right: 16,
             bottom: 16,
@@ -871,18 +898,6 @@ class _HotScreenState extends State<HotScreen> {
           onPressed: () => _showThemeBottomSheet(),
           child: Icon(
             AppTheme.getThemeIcon(widget.currentTheme),
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 8),
-        // Sort FAB
-        FloatingActionButton(
-          heroTag: "sort_fab",
-          mini: true,
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          onPressed: () => _showSortBottomSheet(),
-          child: const Icon(
-            Icons.sort,
             color: Colors.white,
           ),
         ),
@@ -1024,6 +1039,19 @@ class _HotScreenState extends State<HotScreen> {
               },
             )),
             const SizedBox(height: 16),
+            // Attribution
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Text(
+                'Made with ❤️ by Nikhil Bastikar',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -1106,6 +1134,167 @@ class _HotScreenState extends State<HotScreen> {
         return 'Top Ranking';
       case SortOption.rankingLow:
         return 'Lower Ranking';
+    }
+  }
+
+  LinearGradient _getArticleCardGradient(AppThemeMode theme) {
+    switch (theme) {
+      case AppThemeMode.colorful:
+        return LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.vibrantPurple.withOpacity(0.3),
+            AppTheme.vibrantPink.withOpacity(0.25),
+            AppTheme.vibrantPurple.withOpacity(0.2),
+          ],
+        );
+      case AppThemeMode.light:
+      case AppThemeMode.dark:
+      default:
+        return LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withOpacity(0.3),
+            Colors.white.withOpacity(0.2),
+            Colors.white.withOpacity(0.15),
+          ],
+        );
+    }
+  }
+
+  Color _getArticleCardBorderColor(AppThemeMode theme) {
+    switch (theme) {
+      case AppThemeMode.colorful:
+        return AppTheme.vibrantPurple.withOpacity(0.4);
+      case AppThemeMode.light:
+      case AppThemeMode.dark:
+      default:
+        return Colors.white.withOpacity(0.3);
+    }
+  }
+
+  List<BoxShadow> _getArticleCardShadows(AppThemeMode theme) {
+    switch (theme) {
+      case AppThemeMode.colorful:
+        return [
+          BoxShadow(
+            color: AppTheme.vibrantPurple.withOpacity(0.4),
+            blurRadius: 25,
+            spreadRadius: 0,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppTheme.vibrantPink.withOpacity(0.3),
+            blurRadius: 50,
+            spreadRadius: 0,
+            offset: const Offset(0, 20),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.4),
+            blurRadius: 0,
+            spreadRadius: 0,
+            offset: const Offset(0, 1),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            spreadRadius: 0,
+            offset: const Offset(0, 5),
+          ),
+        ];
+      case AppThemeMode.light:
+      case AppThemeMode.dark:
+      default:
+        return [
+          BoxShadow(
+            color: AppTheme.primaryBlue.withOpacity(0.4),
+            blurRadius: 25,
+            spreadRadius: 0,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppTheme.darkBlue.withOpacity(0.3),
+            blurRadius: 50,
+            spreadRadius: 0,
+            offset: const Offset(0, 20),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.4),
+            blurRadius: 0,
+            spreadRadius: 0,
+            offset: const Offset(0, 1),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            spreadRadius: 0,
+            offset: const Offset(0, 5),
+          ),
+        ];
+    }
+  }
+
+  LinearGradient _getNumberBadgeGradient(AppThemeMode theme) {
+    switch (theme) {
+      case AppThemeMode.colorful:
+        return LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.vibrantPurple,
+            AppTheme.vibrantPink,
+          ],
+        );
+      case AppThemeMode.light:
+      case AppThemeMode.dark:
+      default:
+        return LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryBlue,
+            AppTheme.darkBlue,
+          ],
+        );
+    }
+  }
+
+  List<BoxShadow> _getNumberBadgeShadows(AppThemeMode theme) {
+    switch (theme) {
+      case AppThemeMode.colorful:
+        return [
+          BoxShadow(
+            color: AppTheme.vibrantPurple.withOpacity(0.5),
+            blurRadius: 12,
+            spreadRadius: 0,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 3),
+          ),
+        ];
+      case AppThemeMode.light:
+      case AppThemeMode.dark:
+      default:
+        return [
+          BoxShadow(
+            color: AppTheme.primaryBlue.withOpacity(0.5),
+            blurRadius: 12,
+            spreadRadius: 0,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 3),
+          ),
+        ];
     }
   }
 }

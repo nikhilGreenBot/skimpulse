@@ -102,3 +102,45 @@ android/key.properties
 android/keystore/
 *.jks
 *.keystore
+
+# iOS/macOS certificates and provisioning profiles
+*.p12
+*.p8
+*.mobileprovision
+*.cer
+*.certSigningRequest
+ios/*.mobileprovision
+ios/*.p12
+ios/*.p8
+macos/*.mobileprovision
+macos/*.p12
+macos/*.p8
+
+# API keys and secrets
+**/secrets/
+**/credentials/
+*.secret
+*.key
+*.pem
+*.pkey
+
+# Environment files
+.env*
+!.env.example
+!.env.template
+
+# Firebase config (if using)
+google-services.json
+GoogleService-Info.plist
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db

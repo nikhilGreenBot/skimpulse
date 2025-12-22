@@ -140,6 +140,39 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Version check endpoint for forced updates
+app.get('/api/version', (req, res) => {
+  // Current app version from pubspec.yaml: 1.0.0+1
+  // Format: "major.minor.patch+build"
+  const currentAppVersion = '1.0.0'; // Update this when you release new versions
+  
+  // Minimum required version (force update if below this)
+  const minimumVersion = process.env.MINIMUM_APP_VERSION || '1.0.0';
+  
+  // Latest available version
+  const latestVersion = process.env.LATEST_APP_VERSION || '1.0.0';
+  
+  // Whether to force update (set via environment variable)
+  const forceUpdate = process.env.FORCE_UPDATE === 'true' || false;
+  
+  // Update URLs (set these to your app store URLs)
+  const updateUrl = process.env.UPDATE_URL || null;
+  
+  // Custom update message
+  const updateMessage = process.env.UPDATE_MESSAGE || 
+    'A new version of Skimpulse is available. Please update to continue using the app.';
+  
+  res.json({
+    currentVersion: currentAppVersion,
+    minimumVersion: minimumVersion,
+    latestVersion: latestVersion,
+    forceUpdate: forceUpdate,
+    updateUrl: updateUrl,
+    updateMessage: updateMessage,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
