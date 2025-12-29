@@ -6,19 +6,18 @@ A modern mobile application for technology news and articles.
 
 ### Android
 <div align="center">
-  <img src="screenshots/android/android-main.png" alt="Android Main Screen" width="200"/>
-  <img src="screenshots/android/android-article.png" alt="Android Article View" width="200"/>
+  <img src="screenshots/android/android-main-list-view.png" alt="Android Main Screen" width="200"/>
+  <img src="screenshots/android/android-article-view.png" alt="Android Article View" width="200"/>
+  <img src="screenshots/android/android-splash-screen.png" alt="Android Splash Screen" width="200"/>
+  <img src="screenshots/android/android-theme-view.png" alt="Android Theme View" width="200"/>
 </div>
 
 ### iOS
 <div align="center">
-  <img src="screenshots/ios/ios-main.png" alt="iOS Main Screen" width="200"/>
-  <img src="screenshots/ios/ios-article.png" alt="iOS Article View" width="200"/>
-</div>
-
-### Web
-<div align="center">
-  <img src="screenshots/web/web-main.png" alt="Web Main Screen" width="400"/>
+  <img src="screenshots/ios/iphone-main-list.png" alt="iOS Main Screen" width="200"/>
+  <img src="screenshots/ios/iphone-article-view.png" alt="iOS Article View" width="200"/>
+  <img src="screenshots/ios/iphone-splash-screen.png" alt="iOS Splash Screen" width="200"/>
+  <img src="screenshots/ios/iphone-theme-view.png" alt="iOS Theme View" width="200"/>
 </div>
 
 ## Features
