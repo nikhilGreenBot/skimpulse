@@ -79,3 +79,5 @@ If the icons don't match, you can regenerate them from the SVG:
 3. **If icons are correct:**
    - Mark this task as complete ✅
    - Move on to next task (screenshots or code signing)
+
+
