@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -35,8 +34,12 @@ class VersionInfo {
     final parts2 = v2.split('.').map((e) => int.tryParse(e) ?? 0).toList();
     
     // Pad with zeros to make same length
-    while (parts1.length < parts2.length) parts1.add(0);
-    while (parts2.length < parts1.length) parts2.add(0);
+    while (parts1.length < parts2.length) {
+      parts1.add(0);
+    }
+    while (parts2.length < parts1.length) {
+      parts2.add(0);
+    }
     
     for (int i = 0; i < parts1.length; i++) {
       if (parts1[i] < parts2[i]) return -1;
@@ -80,7 +83,6 @@ class VersionService {
       } catch (e) {
         // If version check fails, allow app to continue
         // This prevents blocking users if version endpoint is down
-        print('Version check failed: $e');
       }
       
       // Default: no update required if server check fails

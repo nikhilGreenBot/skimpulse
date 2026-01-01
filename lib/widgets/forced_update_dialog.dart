@@ -47,11 +47,6 @@ class ForcedUpdateDialog extends StatelessWidget {
         final androidUri = Uri.parse(
           'https://play.google.com/store/apps/details?id=com.nikhilbastikar.skimpulse',
         );
-        // For iOS
-        final iosUri = Uri.parse(
-          'https://apps.apple.com/app/id<YOUR_APP_ID>',
-        );
-        
         // Try Android first (you can detect platform if needed)
         if (await canLaunchUrl(androidUri)) {
           await launchUrl(androidUri, mode: LaunchMode.externalApplication);
@@ -100,7 +95,7 @@ class ForcedUpdateDialog extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                 ),
                 child: const Icon(
                   Icons.system_update,
@@ -141,7 +136,7 @@ class ForcedUpdateDialog extends StatelessWidget {
                 'Required: ${versionInfo.minimumVersion}',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                 ),
                 textAlign: TextAlign.center,
               ),

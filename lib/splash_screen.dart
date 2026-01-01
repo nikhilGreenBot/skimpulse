@@ -19,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _lightningController;
   late Animation<double> _logoAnimation;
   late Animation<double> _textAnimation;
-  late Animation<double> _lightningAnimation;
   late Animation<Color?> _backgroundAnimation;
 
   @override
@@ -57,13 +56,14 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeInOut,
     ));
 
-    _lightningAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _lightningController,
-      curve: Curves.bounceOut,
-    ));
+    // _lightningAnimation is not currently used - commented out to remove warning
+    // _lightningAnimation = Tween<double>(
+    //   begin: 0.0,
+    //   end: 1.0,
+    // ).animate(CurvedAnimation(
+    //   parent: _lightningController,
+    //   curve: Curves.bounceOut,
+    // ));
 
     _backgroundAnimation = ColorTween(
       begin: AppTheme.primaryBlue.withValues(alpha: 0.3),

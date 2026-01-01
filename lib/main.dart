@@ -290,7 +290,7 @@ class _HotScreenState extends State<HotScreen> {
   bool _isRefreshing = false;
   
   // Sorting state
-  SortOption _currentSort = SortOption.original;
+  final SortOption _currentSort = SortOption.original;
   List<Article> _originalArticles = [];
 
   @override
@@ -434,15 +434,6 @@ class _HotScreenState extends State<HotScreen> {
     }
   }
 
-  void _onSortChanged(SortOption newSort) {
-    setState(() {
-      _currentSort = newSort;
-      if (_originalArticles.isNotEmpty) {
-        future = Future.value(_sortArticles(_originalArticles));
-      }
-    });
-  }
-
   Future<void> _openArticle(Article article) async {
     await Navigator.push(
       context,
@@ -516,7 +507,7 @@ class _HotScreenState extends State<HotScreen> {
                       backgroundColor: Theme.of(context)
                           .colorScheme
                           .inversePrimary
-                          .withOpacity(0.85),
+                          .withValues(alpha: 0.85),
                       elevation: 0,
                       actions: [
                         IconButton(
@@ -555,7 +546,7 @@ class _HotScreenState extends State<HotScreen> {
                                 child: Text(
                                   'Made with ❤️ by Nikhil Bastikar',
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                     fontSize: 12,
                                   ),
                                   textAlign: TextAlign.center,
@@ -565,7 +556,6 @@ class _HotScreenState extends State<HotScreen> {
                             
                             // Check if this position should show an ad
                             if (AdManager.shouldShowAd(index)) {
-                              print('🎯 Showing ad at index $index');
                               return TweenAnimationBuilder<double>(
                                 duration: Duration(milliseconds: 300 + (index * 50)),
                                 tween: Tween(begin: 0.0, end: 1.0),
@@ -651,7 +641,7 @@ class _HotScreenState extends State<HotScreen> {
                                             color: Theme.of(context).colorScheme.onSurface,
                                             shadows: [
                                               Shadow(
-                                                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
                                                 blurRadius: 1,
                                                 offset: const Offset(0, 1),
                                               ),
@@ -666,11 +656,11 @@ class _HotScreenState extends State<HotScreen> {
                                               .textTheme
                                               .labelMedium
                                               ?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                             fontWeight: FontWeight.w600,
                                             shadows: [
                                               Shadow(
-                                                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
                                                 blurRadius: 1,
                                                 offset: const Offset(0, 1),
                                               ),
@@ -708,7 +698,7 @@ class _HotScreenState extends State<HotScreen> {
                         child: Positioned.fill(
                           child: AbsorbPointer(
                             child: Container(
-                              color: Colors.black.withOpacity(0.6),
+                              color: Colors.black.withValues(alpha: 0.6),
                               child: Center(
                                 child: Container(
                                   padding: const EdgeInsets.all(24),
@@ -717,7 +707,7 @@ class _HotScreenState extends State<HotScreen> {
                                     borderRadius: BorderRadius.circular(16),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
+                                        color: Colors.black.withValues(alpha: 0.3),
                                         blurRadius: 20,
                                         spreadRadius: 5,
                                       ),
@@ -762,13 +752,13 @@ class _HotScreenState extends State<HotScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Colors.white.withOpacity(0.98),
-                          Colors.white.withOpacity(0.95),
+                          Colors.white.withValues(alpha: 0.98),
+                          Colors.white.withValues(alpha: 0.95),
                         ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primaryBlue.withOpacity(0.15),
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.15),
                           blurRadius: 12,
                           spreadRadius: 2,
                           offset: const Offset(0, 4),
@@ -799,7 +789,7 @@ class _HotScreenState extends State<HotScreen> {
                               ? 'We\'re having trouble connecting to our servers.'
                               : 'Unable to load articles from the server.',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -905,97 +895,6 @@ class _HotScreenState extends State<HotScreen> {
     );
   }
 
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-        border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
-            width: 0.5,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildBottomNavItem(
-                icon: Icons.home,
-                label: 'Home',
-                isSelected: true,
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem({
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: isSelected 
-              ? Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                  width: 1,
-                )
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected 
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-              size: 22,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showThemeBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -1016,7 +915,7 @@ class _HotScreenState extends State<HotScreen> {
               height: 4,
               margin: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1045,7 +944,7 @@ class _HotScreenState extends State<HotScreen> {
               child: Text(
                 'Made with ❤️ by Nikhil Bastikar',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   fontSize: 12,
                 ),
                 textAlign: TextAlign.center,
@@ -1058,85 +957,6 @@ class _HotScreenState extends State<HotScreen> {
     );
   }
 
-  void _showSortBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Sort Articles',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-            ...SortOption.values.map((option) => ListTile(
-              leading: Icon(_getSortIcon(option)),
-              title: Text(_getSortLabel(option)),
-              trailing: _currentSort == option 
-                  ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
-                  : null,
-              onTap: () {
-                _onSortChanged(option);
-                Navigator.pop(context);
-              },
-            )),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  IconData _getSortIcon(SortOption option) {
-    switch (option) {
-      case SortOption.original:
-        return Icons.list;
-      case SortOption.alphabetical:
-        return Icons.sort_by_alpha;
-      case SortOption.reverseAlphabetical:
-        return Icons.sort_by_alpha;
-      case SortOption.rankingHigh:
-        return Icons.trending_up;
-      case SortOption.rankingLow:
-        return Icons.trending_down;
-    }
-  }
-
-  String _getSortLabel(SortOption option) {
-    switch (option) {
-      case SortOption.original:
-        return 'Original Order';
-      case SortOption.alphabetical:
-        return 'A-Z';
-      case SortOption.reverseAlphabetical:
-        return 'Z-A';
-      case SortOption.rankingHigh:
-        return 'Top Ranking';
-      case SortOption.rankingLow:
-        return 'Lower Ranking';
-    }
-  }
-
   LinearGradient _getArticleCardGradient(AppThemeMode theme) {
     switch (theme) {
       case AppThemeMode.colorful:
@@ -1144,21 +964,20 @@ class _HotScreenState extends State<HotScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.vibrantPurple.withOpacity(0.3),
-            AppTheme.vibrantPink.withOpacity(0.25),
-            AppTheme.vibrantPurple.withOpacity(0.2),
+            AppTheme.vibrantPurple.withValues(alpha: 0.3),
+            AppTheme.vibrantPink.withValues(alpha: 0.25),
+            AppTheme.vibrantPurple.withValues(alpha: 0.2),
           ],
         );
       case AppThemeMode.light:
       case AppThemeMode.dark:
-      default:
         return LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withOpacity(0.3),
-            Colors.white.withOpacity(0.2),
-            Colors.white.withOpacity(0.15),
+            Colors.white.withValues(alpha: 0.3),
+            Colors.white.withValues(alpha: 0.2),
+            Colors.white.withValues(alpha: 0.15),
           ],
         );
     }
@@ -1167,11 +986,10 @@ class _HotScreenState extends State<HotScreen> {
   Color _getArticleCardBorderColor(AppThemeMode theme) {
     switch (theme) {
       case AppThemeMode.colorful:
-        return AppTheme.vibrantPurple.withOpacity(0.4);
+        return AppTheme.vibrantPurple.withValues(alpha: 0.4);
       case AppThemeMode.light:
       case AppThemeMode.dark:
-      default:
-        return Colors.white.withOpacity(0.3);
+        return Colors.white.withValues(alpha: 0.3);
     }
   }
 
@@ -1180,25 +998,25 @@ class _HotScreenState extends State<HotScreen> {
       case AppThemeMode.colorful:
         return [
           BoxShadow(
-            color: AppTheme.vibrantPurple.withOpacity(0.4),
+            color: AppTheme.vibrantPurple.withValues(alpha: 0.4),
             blurRadius: 25,
             spreadRadius: 0,
             offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: AppTheme.vibrantPink.withOpacity(0.3),
+            color: AppTheme.vibrantPink.withValues(alpha: 0.3),
             blurRadius: 50,
             spreadRadius: 0,
             offset: const Offset(0, 20),
           ),
           BoxShadow(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withValues(alpha: 0.4),
             blurRadius: 0,
             spreadRadius: 0,
             offset: const Offset(0, 1),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             spreadRadius: 0,
             offset: const Offset(0, 5),
@@ -1206,28 +1024,27 @@ class _HotScreenState extends State<HotScreen> {
         ];
       case AppThemeMode.light:
       case AppThemeMode.dark:
-      default:
         return [
           BoxShadow(
-            color: AppTheme.primaryBlue.withOpacity(0.4),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.4),
             blurRadius: 25,
             spreadRadius: 0,
             offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: AppTheme.darkBlue.withOpacity(0.3),
+            color: AppTheme.darkBlue.withValues(alpha: 0.3),
             blurRadius: 50,
             spreadRadius: 0,
             offset: const Offset(0, 20),
           ),
           BoxShadow(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withValues(alpha: 0.4),
             blurRadius: 0,
             spreadRadius: 0,
             offset: const Offset(0, 1),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             spreadRadius: 0,
             offset: const Offset(0, 5),
@@ -1249,7 +1066,6 @@ class _HotScreenState extends State<HotScreen> {
         );
       case AppThemeMode.light:
       case AppThemeMode.dark:
-      default:
         return LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1266,13 +1082,13 @@ class _HotScreenState extends State<HotScreen> {
       case AppThemeMode.colorful:
         return [
           BoxShadow(
-            color: AppTheme.vibrantPurple.withOpacity(0.5),
+            color: AppTheme.vibrantPurple.withValues(alpha: 0.5),
             blurRadius: 12,
             spreadRadius: 0,
             offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             spreadRadius: 0,
             offset: const Offset(0, 3),
@@ -1280,16 +1096,15 @@ class _HotScreenState extends State<HotScreen> {
         ];
       case AppThemeMode.light:
       case AppThemeMode.dark:
-      default:
         return [
           BoxShadow(
-            color: AppTheme.primaryBlue.withOpacity(0.5),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.5),
             blurRadius: 12,
             spreadRadius: 0,
             offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             spreadRadius: 0,
             offset: const Offset(0, 3),

@@ -22,23 +22,20 @@ class AdBanner extends StatefulWidget {
 class _AdBannerState extends State<AdBanner> {
   @override
   Widget build(BuildContext context) {
-    print('🎯 Building ad banner for ${widget.adId}, AdMob initialized: ${AdMobService.isInitialized}');
-    
     if (widget.useAdMob && AdMobService.isInitialized) {
       return AdMobBannerWidget(
         adUnitId: AdMobService.bannerAdUnitId,
         adSize: widget.adSize,
         onAdLoaded: () {
-          print('✅ AdMob banner loaded for ${widget.adId}');
+          // Ad loaded successfully
         },
         onAdFailedToLoad: () {
-          print('❌ AdMob banner failed to load for ${widget.adId}');
+          // Ad failed to load
         },
       );
     }
 
     // Fallback to placeholder ad if AdMob is not available
-    print('🔄 Using placeholder ad for ${widget.adId}');
     return _buildPlaceholderAd(context);
   }
 
@@ -51,18 +48,18 @@ class _AdBannerState extends State<AdBanner> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.primaryBlue.withOpacity(0.1),
-            AppTheme.primaryYellow.withOpacity(0.05),
-            AppTheme.darkBlue.withOpacity(0.08),
+            AppTheme.primaryBlue.withValues(alpha: 0.1),
+            AppTheme.primaryYellow.withValues(alpha: 0.05),
+            AppTheme.darkBlue.withValues(alpha: 0.08),
           ],
         ),
         border: Border.all(
-          color: AppTheme.primaryBlue.withOpacity(0.3),
+          color: AppTheme.primaryBlue.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryBlue.withOpacity(0.2),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.2),
             blurRadius: 8,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -79,7 +76,7 @@ class _AdBannerState extends State<AdBanner> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryBlue.withOpacity(0.2),
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -95,7 +92,7 @@ class _AdBannerState extends State<AdBanner> {
                 Icon(
                   Icons.open_in_new,
                   size: 16,
-                  color: AppTheme.primaryBlue.withOpacity(0.7),
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.7),
                 ),
               ],
             ),
@@ -115,7 +112,7 @@ class _AdBannerState extends State<AdBanner> {
           height: 20,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withOpacity(0.1),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4),
           ),
         ),
@@ -124,7 +121,7 @@ class _AdBannerState extends State<AdBanner> {
           height: 16,
           width: 200,
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withOpacity(0.1),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4),
           ),
         ),
@@ -133,7 +130,7 @@ class _AdBannerState extends State<AdBanner> {
           height: 16,
           width: 150,
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withOpacity(0.1),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4),
           ),
         ),
@@ -142,7 +139,7 @@ class _AdBannerState extends State<AdBanner> {
           height: 32,
           width: 120,
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withOpacity(0.2),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
         ),
