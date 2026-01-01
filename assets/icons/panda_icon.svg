@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blue background - solid color -->
+  <rect width="1024" height="1024" fill="#4A90E2"/>
+  
+  <!-- Panda face - white -->
+  <circle cx="512" cy="512" r="348" fill="#FFFFFF"/>
+  
+  <!-- Left ear - black -->
+  <circle cx="270" cy="250" r="115" fill="#222222"/>
+  
+  <!-- Right ear - black -->
+  <circle cx="754" cy="250" r="115" fill="#222222"/>
+  
+  <!-- Left eye patch - dark gray -->
+  <ellipse cx="380" cy="500" rx="105" ry="100" fill="#444444"/>
+  
+  <!-- Right eye patch - dark gray -->
+  <ellipse cx="644" cy="500" rx="105" ry="100" fill="#444444"/>
+  
+  <!-- Left eye - black -->
+  <circle cx="380" cy="500" r="55" fill="#111111"/>
+  
+  <!-- Right eye - black -->
+  <circle cx="644" cy="500" r="55" fill="#111111"/>
+  
+  <!-- Left eye highlight - white -->
+  <circle cx="358" cy="480" r="18" fill="#FFFFFF"/>
+  
+  <!-- Right eye highlight - white -->
+  <circle cx="622" cy="480" r="18" fill="#FFFFFF"/>
+  
+  <!-- Nose - black -->
+  <ellipse cx="512" cy="590" rx="26" ry="20" fill="#222222"/>
+  
+  <!-- Mouth line -->
+  <line x1="512" y1="610" x2="512" y2="648" stroke="#222222" stroke-width="14" stroke-linecap="round"/>
+</svg>

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
 
-/// Panda icon widget - consistent branding across the app
-/// Blue circular background with cute panda face
-class PandaLightningIcon extends StatelessWidget {
+class PandaIcon extends StatelessWidget {
   final double size;
   final bool showShadow;
   final bool showBlueBackground;
 
-  const PandaLightningIcon({
+  const PandaIcon({
     super.key,
     required this.size,
     this.showShadow = true,
@@ -38,7 +36,7 @@ class _PandaIconPainter extends CustomPainter {
     final Offset center = Offset(size.width / 2, size.height / 2);
     final double radius = size.width / 2;
 
-    // Background circle with subtle radial gradient
+    // Background circle with subtle radial depth
     if (showBlueBackground) {
       final Rect bgRect = Rect.fromCircle(center: center, radius: radius);
       final Paint bgPaint = Paint()
@@ -54,7 +52,7 @@ class _PandaIconPainter extends CustomPainter {
         ).createShader(bgRect);
       canvas.drawCircle(center, radius, bgPaint);
 
-      // Subtle vignette for depth
+      // Vignette for extra depth
       final Paint vignette = Paint()
         ..shader = RadialGradient(
           colors: [Colors.transparent, Colors.black.withValues(alpha: 0.12)],
@@ -63,7 +61,7 @@ class _PandaIconPainter extends CustomPainter {
       canvas.drawCircle(center, radius, vignette);
     }
 
-    // Panda face - white circle with gradient
+    // Panda face with radial highlight
     final double faceRadius = size.width * 0.34;
     final Rect faceRect = Rect.fromCircle(center: center, radius: faceRadius);
     final Paint facePaint = Paint()
@@ -74,7 +72,7 @@ class _PandaIconPainter extends CustomPainter {
         stops: const [0.0, 1.0],
       ).createShader(faceRect);
 
-    // Face shadow for elevation effect
+    // Face shadow to add elevation
     if (showShadow) {
       final Paint faceShadow = Paint()
         ..color = Colors.black.withValues(alpha: 0.2)
@@ -91,7 +89,7 @@ class _PandaIconPainter extends CustomPainter {
     canvas.drawCircle(earLeft, earRadius, earPaint);
     canvas.drawCircle(earRight, earRadius, earPaint);
 
-    // Eye patches (dark circles around eyes)
+    // Eye patches
     final double patchRadius = faceRadius * 0.55;
     final Offset patchLeft = center + Offset(-faceRadius * 0.52, -faceRadius * 0.05);
     final Offset patchRight = center + Offset(faceRadius * 0.52, -faceRadius * 0.05);
@@ -99,25 +97,23 @@ class _PandaIconPainter extends CustomPainter {
     canvas.drawCircle(patchLeft, patchRadius * 0.55, patchPaint);
     canvas.drawCircle(patchRight, patchRadius * 0.55, patchPaint);
 
-    // Eyes (black circles)
+    // Eyes
     final Paint eyePaint = Paint()..color = Colors.black;
     final double eyeRadius = faceRadius * 0.16;
     canvas.drawCircle(patchLeft, eyeRadius, eyePaint);
     canvas.drawCircle(patchRight, eyeRadius, eyePaint);
 
-    // Eye highlights (white dots)
+    // Eye highlights
     final Paint glint = Paint()..color = Colors.white;
     final double glintRadius = eyeRadius * 0.35;
     canvas.drawCircle(patchLeft.translate(-eyeRadius * 0.25, -eyeRadius * 0.25), glintRadius, glint);
     canvas.drawCircle(patchRight.translate(-eyeRadius * 0.25, -eyeRadius * 0.25), glintRadius, glint);
 
-    // Nose
+    // Nose and mouth
     final Paint nosePaint = Paint()..color = Colors.black87;
     final double noseRadius = faceRadius * 0.08;
     final Offset noseCenter = center.translate(0, faceRadius * 0.2);
     canvas.drawCircle(noseCenter, noseRadius, nosePaint);
-    
-    // Mouth line
     final Paint mouthPaint = Paint()
       ..color = Colors.black87
       ..strokeWidth = size.width * 0.015
@@ -138,3 +134,4 @@ class _PandaIconPainter extends CustomPainter {
     return oldDelegate.showShadow != showShadow || oldDelegate.showBlueBackground != showBlueBackground;
   }
 }
+

@@ -46,9 +46,13 @@ class AdMobBannerWidget extends StatefulWidget {
   State<AdMobBannerWidget> createState() => _AdMobBannerWidgetState();
 }
 
-class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
+class _AdMobBannerWidgetState extends State<AdMobBannerWidget>
+    with AutomaticKeepAliveClientMixin {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+
+  @override
+  bool get wantKeepAlive => true; // Keep the ad alive when scrolling
 
   @override
   void initState() {
@@ -63,22 +67,23 @@ class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          setState(() {
-            _isAdLoaded = true;
-          });
+          if (mounted) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          }
           widget.onAdLoaded?.call();
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           widget.onAdFailedToLoad?.call();
           
-          if (error.code == 1) {
-            Future.delayed(const Duration(seconds: 5), () {
-              if (mounted) {
-                _loadAd();
-              }
-            });
-          }
+          // Retry after 5 seconds on failure
+          Future.delayed(const Duration(seconds: 5), () {
+            if (mounted && !_isAdLoaded) {
+              _loadAd();
+            }
+          });
         },
       ),
     );
@@ -94,46 +99,49 @@ class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isAdLoaded || _bannerAd == null) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
+    if (_isAdLoaded && _bannerAd != null) {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        height: 50,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.blue.withValues(alpha: 0.1),
           border: Border.all(
-            color: Colors.blue.withValues(alpha: 0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
-        child: const Center(
-          child: Text(
-            'Loading Ad...',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            width: _bannerAd!.size.width.toDouble(),
+            height: _bannerAd!.size.height.toDouble(),
+            child: AdWidget(ad: _bannerAd!),
           ),
         ),
       );
     }
 
+    // Loading state - show placeholder
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      height: 50,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
+        color: Colors.grey.withValues(alpha: 0.1),
         border: Border.all(
-          color: Colors.grey.withValues(alpha: 0.3),
+          color: Colors.grey.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+      child: const Center(
         child: SizedBox(
-          width: _bannerAd!.size.width.toDouble(),
-          height: _bannerAd!.size.height.toDouble(),
-          child: AdWidget(ad: _bannerAd!),
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+          ),
         ),
       ),
     );

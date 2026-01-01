@@ -22,6 +22,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/panda_icon.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true
@@ -29,3 +37,4 @@ flutter:
   assets:
     - assets/videos/
     - assets/images/
+    - assets/icons/
