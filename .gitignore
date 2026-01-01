@@ -144,3 +144,6 @@ fastlane/test_output
 *.temp
 .DS_Store
 Thumbs.db
+
+# Deployment artifacts
+server-deploy/
