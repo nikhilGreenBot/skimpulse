@@ -126,9 +126,13 @@ app.get('/api/skimfeed', async (req, res) => {
         // Convert relative URL to absolute URL
         const fullUrl = url.startsWith('http') ? url : `https://skimfeed.com/${url}`;
         
+        // Use current date as published date (skimfeed doesn't provide actual publication dates)
+        const publishedDate = new Date().toISOString();
+        
         articles.push({
           title: title,
-          url: fullUrl
+          url: fullUrl,
+          publishedDate: publishedDate
         });
         
         console.log(`📰 Added: "${title}" -> ${fullUrl}`);

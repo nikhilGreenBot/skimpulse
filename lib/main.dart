@@ -250,18 +250,30 @@ class Article {
   final String title;
   final String url;
   final int? ranking;
+  final DateTime? publishedDate;
   
   Article({
     required this.title, 
     required this.url,
     this.ranking,
+    this.publishedDate,
   });
   
   factory Article.fromJson(Map<String, dynamic> json) {
+    DateTime? publishedDate;
+    if (json['publishedDate'] != null) {
+      if (json['publishedDate'] is String) {
+        publishedDate = DateTime.tryParse(json['publishedDate']);
+      } else if (json['publishedDate'] is int) {
+        publishedDate = DateTime.fromMillisecondsSinceEpoch(json['publishedDate']);
+      }
+    }
+    
     return Article(
       title: json['title'] ?? '',
       url: json['url'] ?? '',
       ranking: json['ranking'],
+      publishedDate: publishedDate,
     );
   }
 }
@@ -297,7 +309,21 @@ class _HotScreenState extends State<HotScreen> {
   void initState() {
     super.initState();
     // Use preloaded future if available, otherwise fetch
-    future = widget.preloadedFuture ?? fetchArticlesWithRetry();
+    if (widget.preloadedFuture != null) {
+      // Check if preloaded data is empty (indicating failure), and retry if so
+      future = _initializeFuture();
+    } else {
+      future = fetchArticlesWithRetry();
+    }
+  }
+
+  Future<List<Article>> _initializeFuture() async {
+    final articles = await widget.preloadedFuture!;
+    if (articles.isEmpty) {
+      // Preload failed, retry fetching
+      return await fetchArticlesWithRetry();
+    }
+    return articles;
   }
 
   @override
@@ -444,13 +470,36 @@ class _HotScreenState extends State<HotScreen> {
   }
 
   String _formatDate(Article article) {
-    // Show ranking as the primary identifier
-    if (article.ranking != null) {
-      return 'Rank #${article.ranking}';
+    if (article.publishedDate != null) {
+      final date = article.publishedDate!;
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final day = date.day;
+      final daySuffix = _getDaySuffix(day);
+      final month = months[date.month - 1];
+      final year = date.year;
+      
+      return '$month ${day}$daySuffix $year';
     }
     
-    // Fallback
-    return 'Latest';
+    // Fallback if no date available - return empty string
+    return '';
+  }
+
+  String _getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
   }
 
 
@@ -482,6 +531,74 @@ class _HotScreenState extends State<HotScreen> {
             future: future,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                // If data is empty, treat it as an error
+                if (snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Container(
+                      margin: const EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.all(24.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.98),
+                            Colors.white.withValues(alpha: 0.95),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.15),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No Articles Found',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Unable to load articles. Please try refreshing.',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            onPressed: _isRefreshing ? null : _refreshFromButton,
+                            icon: _isRefreshing 
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.refresh),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
                 return Stack(
                   children: [
                     CustomScrollView(
