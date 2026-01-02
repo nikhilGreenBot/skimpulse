@@ -74,6 +74,7 @@ class AppWrapper extends StatefulWidget {
 class _AppWrapperState extends State<AppWrapper> {
   bool _showSplash = true;
   late Future<List<Article>> _preloadedFuture;
+  late Future<VersionInfo?> _versionCheckFuture;
   VersionInfo? _versionInfo;
   bool _showUpdateDialog = false;
 
@@ -86,21 +87,20 @@ class _AppWrapperState extends State<AppWrapper> {
 
   Future<void> _checkVersionAndPreload() async {
     // Check version in parallel with preloading
-    final versionCheck = VersionService.checkVersion();
+    _versionCheckFuture = VersionService.checkVersion().catchError((e) => null);
     _preloadedFuture = _preloadArticles();
     
-    // Wait for version check
-    _versionInfo = await versionCheck;
-    
-    // Check if forced update is required
-    if (_versionInfo != null && 
-        (_versionInfo!.forceUpdate || _versionInfo!.needsUpdate)) {
-      if (mounted) {
+    // Wait for version check (don't block, let _onSplashComplete handle it)
+    _versionCheckFuture.then((info) {
+      _versionInfo = info;
+      // Only set update dialog if splash is still showing
+      if (mounted && _showSplash && info != null && 
+          (info.forceUpdate || info.needsUpdate)) {
         setState(() {
           _showUpdateDialog = true;
         });
       }
-    }
+    });
   }
 
   Future<List<Article>> _preloadArticles() async {
@@ -202,12 +202,29 @@ class _AppWrapperState extends State<AppWrapper> {
       // Even if data load fails, proceed to main screen to show error
     }
     
+    // Wait for version check to complete (with timeout to prevent blocking)
+    try {
+      _versionInfo = await _versionCheckFuture.timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => null,
+      );
+    } catch (e) {
+      // If version check fails or times out, allow app to continue
+      _versionInfo = null;
+    }
+    
     // Don't proceed if forced update is required
     if (_versionInfo != null && 
         (_versionInfo!.forceUpdate || _versionInfo!.needsUpdate)) {
       if (mounted) {
         setState(() {
           _showUpdateDialog = true;
+        });
+      }
+      // Still hide splash to show update dialog
+      if (mounted) {
+        setState(() {
+          _showSplash = false;
         });
       }
       return;
