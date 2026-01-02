@@ -1,4 +1,4 @@
-// Feed source configuration similar to Skimfeed's custom page
+// Feed source configuration for technology news sources
 class FeedSource {
   final int id;
   final String name;
@@ -173,7 +173,7 @@ class FeedSources {
     FeedSource(id: 292, name: "Ad Week", category: "Agg", rssUrl: "https://www.adweek.com/feed/"),
   ];
 
-  // Predefined feed combinations similar to Skimfeed
+  // Predefined feed combinations for curated news feeds
   static const Map<String, List<int>> predefinedFeeds = {
     "whats_hot": [75, 76, 77, 78, 80, 81, 82, 83, 84, 86, 87, 88, 89, 90, 91, 179, 270, 274, 292],
     "latest": [1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 18, 19, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 85],
