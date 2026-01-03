@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skimpulse - Latest Technology News App</title>
+    <meta name="description" content="Skimpulse - A beautifully crafted app for staying up-to-date with the latest technology news and articles.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #fff;
+            background: #0f0f0f;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1.4em;
+        }
+        .nav-logo img { width: 36px; height: 36px; border-radius: 8px; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #667eea; }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 120px 20px 80px;
+            position: relative;
+        }
+        .hero-content {
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .hero-text { flex: 1; min-width: 300px; }
+        .hero-text h1 { font-size: 3.2em; font-weight: 700; margin-bottom: 20px; line-height: 1.2; }
+        .hero-text p { font-size: 1.2em; opacity: 0.9; margin-bottom: 30px; max-width: 500px; }
+        .hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        .hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-secondary { background: rgba(255,255,255,0.15); color: white; border: 2px solid rgba(255,255,255,0.3); }
+        .hero-image { flex: 0 0 auto; }
+        .phone-mockup img { width: 280px; border-radius: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+
+        /* Features Section */
+        .features { padding: 100px 20px; background: #0f0f0f; }
+        .section-container { max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 2.5em; margin-bottom: 60px; }
+        .section-title span {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .feature-card {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .feature-card:hover { transform: translateY(-5px); border-color: #667eea; }
+        .feature-icon { font-size: 2.5em; margin-bottom: 15px; }
+        .feature-card h3 { font-size: 1.3em; margin-bottom: 10px; }
+        .feature-card p { color: rgba(255,255,255,0.7); font-size: 0.95em; }
+
+        /* Screenshots Section */
+        .screenshots { padding: 100px 20px; background: #141414; }
+        .screenshots-tabs { display: flex; justify-content: center; gap: 20px; margin-bottom: 50px; }
+        .tab-btn {
+            padding: 12px 30px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: white;
+            border-radius: 30px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active, .tab-btn:hover { background: #667eea; border-color: #667eea; }
+        .screenshots-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .screenshot-item { text-align: center; }
+        .screenshot-item img {
+            width: 220px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: transform 0.3s;
+        }
+        .screenshot-item img:hover { transform: scale(1.05); }
+        .screenshot-item p { margin-top: 15px; color: rgba(255,255,255,0.7); font-size: 0.9em; }
+        .hidden { display: none; }
+
+        /* Footer */
+        footer {
+            padding: 60px 20px 30px;
+            background: #0a0a0a;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        .footer-brand h3 { font-size: 1.5em; margin-bottom: 10px; }
+        .footer-brand p { color: rgba(255,255,255,0.6); max-width: 300px; }
+        .footer-links h4 { margin-bottom: 15px; color: #667eea; }
+        .footer-links a {
+            display: block;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover { color: #667eea; }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .hero-text h1 { font-size: 2.2em; }
+            .hero-content { text-align: center; }
+            .hero-badges { justify-content: center; }
+            .hero-buttons { justify-content: center; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="logo.svg" alt="Skimpulse">
+                Skimpulse
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#screenshots">Screenshots</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Stay Informed with Skimpulse</h1>
+                <p>A beautifully crafted app for staying up-to-date with the latest technology news and articles. Clean design, fast performance, and a delightful reading experience.</p>
+                <div class="hero-badges">
+                    <span class="badge">📱 iOS</span>
+                    <span class="badge">🤖 Android</span>
+                    <span class="badge">🌐 Web</span>
+                    <span class="badge">⚡ Flutter</span>
+                </div>
+                <div class="hero-buttons">
+                    <a href="https://github.com/nikhilGreenBot/skimpulse" class="btn btn-primary">
+                        ⭐ View on GitHub
+                    </a>
+                    <a href="#screenshots" class="btn btn-secondary">
+                        📸 See Screenshots
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="phone-mockup">
+                    <img src="screenshots/ios/iphone-main-list.png" alt="Skimpulse App">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="section-container">
+            <h2 class="section-title">Why Choose <span>Skimpulse</span>?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📰</div>
+                    <h3>Latest Tech News</h3>
+                    <p>Curated articles from top technology sources, keeping you informed about what matters most.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Beautiful Reading</h3>
+                    <p>Clean, distraction-free article views designed for comfortable reading sessions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Multiple Themes</h3>
+                    <p>Light and dark modes to suit your preference and reduce eye strain.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Smart Sorting</h3>
+                    <p>Find articles that matter to you with intelligent sorting and filtering options.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Native experience on iOS, Android, Web, macOS, Windows, and Linux.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast & Responsive</h3>
+                    <p>Optimized performance for smooth scrolling and instant article loading.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section id="screenshots" class="screenshots">
+        <div class="section-container">
+            <h2 class="section-title">App <span>Screenshots</span></h2>
+            <div class="screenshots-tabs">
+                <button class="tab-btn active" onclick="showTab('ios')">iOS</button>
+                <button class="tab-btn" onclick="showTab('android')">Android</button>
+            </div>
+            
+            <!-- iOS Screenshots -->
+            <div id="ios-screenshots" class="screenshots-grid">
+                <div class="screenshot-item">
+                    <img src="screenshots/ios/iphone-splash-screen.png" alt="iOS Splash Screen">
+                    <p>Splash Screen</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/ios/iphone-main-list.png" alt="iOS Main Screen">
+                    <p>News Feed</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/ios/iphone-article-view.png" alt="iOS Article View">
+                    <p>Article View</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/ios/iphone-theme-view.png" alt="iOS Theme View">
+                    <p>Theme Options</p>
+                </div>
+            </div>
+            
+            <!-- Android Screenshots -->
+            <div id="android-screenshots" class="screenshots-grid hidden">
+                <div class="screenshot-item">
+                    <img src="screenshots/android/android-splash-screen.png" alt="Android Splash Screen">
+                    <p>Splash Screen</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/android/android-main-list-view.png" alt="Android Main Screen">
+                    <p>News Feed</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/android/android-article-view.png" alt="Android Article View">
+                    <p>Article View</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/android/android-theme-view.png" alt="Android Theme View">
+                    <p>Theme Options</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>Skimpulse</h3>
+                <p>Your go-to app for the latest technology news and articles.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Links</h4>
+                <a href="https://github.com/nikhilGreenBot/skimpulse">GitHub</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+            </div>
+            <div class="footer-links">
+                <h4>Built With</h4>
+                <a href="https://flutter.dev">Flutter</a>
+                <a href="https://dart.dev">Dart</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Made with ❤️ by Nikhil Bastikar · © 2025 Skimpulse</p>
+        </div>
+    </footer>
+
+    <script>
+        function showTab(platform) {
+            // Hide all screenshot grids
+            document.getElementById('ios-screenshots').classList.add('hidden');
+            document.getElementById('android-screenshots').classList.add('hidden');
+            
+            // Show selected platform
+            document.getElementById(platform + '-screenshots').classList.remove('hidden');
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
